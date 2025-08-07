@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyBuddy - Progress</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+            padding-bottom: 60px; /* Space for fixed footer */
+        }
+        .navbar {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .progress-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .card {
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .progress-bar {
+            transition: width 0.3s ease-in-out;
+        }
+        .star {
+            color: #ffc107;
+            font-size: 1.2rem;
+        }
+        canvas {
+            max-width: 100%;
+            margin: 20px 0;
+        }
+        footer {
+            background-color: #343a40;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+        @media (max-width: 768px) {
+            .progress-container {
+                padding: 10px;
+            }
+            canvas {
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">StudyBuddy</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="routine.html">Routine</a></li>
+                    <li class="nav-item"><a class="nav-link" href="mission.html">Mission Board</a></li>
+                    <li class="nav-item"><a class="nav-link" href="exam-recap.html">Exam Recap</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="progress.html">Progress</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Progress Content -->
+    <div class="progress-container">
+        <h1 class="text-center mb-4">Progress Dashboard</h1>
+        <div class="mb-4 text-center">
+            <button class="btn btn-primary" onclick="exportProgress()">Export as PNG</button>
+        </div>
+        <div class="row">
+            <!-- Daily Study Time (Line Graph) -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Daily Study Time (Last 7 Days)</h5>
+                        <canvas id="dailyStudyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <!-- Subject Distribution (Bar Chart) -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Subject Distribution</h5>
+                        <canvas id="subjectChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <!-- Daily Completion -->
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Daily Goal Completion</h5>
+                        <div class="progress">
+                            <div id="dailyProgressBar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Monthly Completion -->
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Monthly Goal Completion</h5>
+                        <div class="progress">
+                            <div id="monthlyProgressBar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Gamification -->
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5>Gamification</h5>
+                        <p>Stars: <span id="starsEarned"></span></p>
+                        <p>Level: <span id="level"></span></p>
+                        <p>Suggestion: <span id="suggestion"></span></p>
+                    </div>
+                </div>
+            </div>
+            <!-- Daily Report -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Daily Report (Today)</h5>
+                        <p>Study Time: <span id="dailyStudyTime"></span></p>
+                        <p>Missions Completed: <span id="dailyMissions"></span></p>
+                        <p>Notes Added: <span id="dailyNotes"></span></p>
+                    </div>
+                </div>
+            </div>
+            <!-- Monthly Summary -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Monthly Summary</h5>
+                        <p>Total Study Time: <span id="monthlyStudyTime"></span></p>
+                        <p>Mission Completion Rate: <span id="monthlyMissionRate"></span></p>
+                        <p>Notes Created: <span id="monthlyNotes"></span></p>
+                    </div>
+                </div>
+            </div>
+            <!-- Personal Bests -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Personal Bests</h5>
+                        <p>Longest Study Day: <span id="longestStudyDay"></span></p>
+                        <p>Most Missions in a Day: <span id="mostMissionsDay"></span></p>
+                    </div>
+                </div>
+            </div>
+            <!-- Week Comparison -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Week Comparison</h5>
+                        <p>Current Week Total: <span id="currentWeekTime"></span></p>
+                        <p>Previous Week Total: <span id="previousWeekTime"></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>© 2025 Urfa Hasan Fattah. All rights reserved.</p>
+    </footer>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
+    <script>
+        // LocalStorage Management
+        function loadStudyData() {
+            return JSON.parse(localStorage.getItem('studyData')) || { dailyTotals: {}, pomodoroSessions: 0 };
+        }
+
+        function loadRoutine() {
+            return JSON.parse(localStorage.getItem('studyRoutine')) || {
+                Sunday: [], Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [], Saturday: []
+            };
+        }
+
+        function loadMissions() {
+            return JSON.parse(localStorage.getItem('studyMissions')) || {
+                Sunday: [], Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [], Saturday: []
+            };
+        }
+
+        function loadNotes() {
+            return JSON.parse(localStorage.getItem('examNotes')) || [];
+        }
+
+        // Date Utilities
+        function getLast7Days() {
+            const days = [];
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                days.push(date.toISOString().split('T')[0]);
+            }
+            return days;
+        }
+
+        function getCurrentWeekRange() {
+            const today = new Date();
+            const firstDay = new Date(today);
+            firstDay.setDate(today.getDate() - today.getDay());
+            return Array.from({ length: 7 }, (_, i) => {
+                const d = new Date(firstDay);
+                d.setDate(firstDay.getDate() + i);
+                return d.toISOString().split('T')[0];
+            });
+        }
+
+        function getPreviousWeekRange() {
+            const today = new Date();
+            const firstDay = new Date(today);
+            firstDay.setDate(today.getDate() - today.getDay() - 7);
+            return Array.from({ length: 7 }, (_, i) => {
+                const d = new Date(firstDay);
+                d.setDate(firstDay.getDate() + i);
+                return d.toISOString().split('T')[0];
+            });
+        }
+
+        function getCurrentMonthRange() {
+            const today = new Date();
+            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+            const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            const days = [];
+            for (let d = new Date(firstDay); d <= lastDay; d.setDate(d.getDate() + 1)) {
+                days.push(d.toISOString().split('T')[0]);
+            }
+            return days;
+        }
+
+        // Visualizations
+        function renderDailyStudyChart() {
+            const studyData = loadStudyData();
+            const days = getLast7Days();
+            const data = days.map(day => studyData.dailyTotals[day] || 0);
+            new Chart(document.getElementById('dailyStudyChart'), {
+                type: 'line',
+                data: {
+                    labels: days.map(d => new Date(d).toLocaleDateString('en-US', { weekday: 'short' })),
+                    datasets: [{
+                        label: 'Study Time (minutes)',
+                        data: data,
+                        borderColor: '#007bff',
+                        backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: { y: { beginAtZero: true, title: { display: true, text: 'Minutes' } } }
+                }
+            });
+        }
+
+        function renderSubjectChart() {
+            const routine = loadRoutine();
+            const missions = loadMissions();
+            const subjects = ['Biology', 'Math', 'Physics', 'Chemistry', 'Other'];
+            const subjectTime = subjects.reduce((acc, subj) => ({ ...acc, [subj]: 0 }), {});
+
+            // Calculate time from routine
+            Object.values(routine).flat().forEach(session => {
+                const [startH, startM] = session.startTime.split(':').map(Number);
+                const [endH, endM] = session.endTime.split(':').map(Number);
+                const minutes = (endH * 60 + endM) - (startH * 60 + startM);
+                subjectTime[session.subject] = (subjectTime[session.subject] || 0) + minutes;
+            });
+
+            // Add mission-based weight (assume completed missions contribute to subject focus)
+            Object.values(missions).flat().forEach(mission => {
+                if (mission.completed) subjectTime[mission.subject] = (subjectTime[mission.subject] || 0) + 30; // Arbitrary 30 min per mission
+            });
+
+            new Chart(document.getElementById('subjectChart'), {
+                type: 'bar',
+                data: {
+                    labels: subjects,
+                    datasets: [{
+                        label: 'Study Time (minutes)',
+                        data: subjects.map(subj => subjectTime[subj] || 0),
+                        backgroundColor: ['#28a745', '#dc3545', '#007bff', '#ffc107', '#6c757d']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: { y: { beginAtZero: true, title: { display: true, text: 'Minutes' } } }
+                }
+            });
+        }
+
+        // Progress Bars
+        function updateProgressBars() {
+            const missions = loadMissions();
+            const today = new Date().toISOString().split('T')[0];
+            const currentDay = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+            const todayMissions = missions[currentDay] || [];
+            const totalMissions = todayMissions.length;
+            const completedMissions = todayMissions.filter(m => m.completed).length;
+            const dailyPercent = totalMissions > 0 ? Math.round((completedMissions / totalMissions) * 100) : 0;
+            document.getElementById('dailyProgressBar').style.width = `${dailyPercent}%`;
+            document.getElementById('dailyProgressBar').textContent = `${dailyPercent}%`;
+            document.getElementById('dailyProgressBar').setAttribute('aria-valuenow', dailyPercent);
+
+            const monthDays = getCurrentMonthRange();
+            let totalMonthMissions = 0, completedMonthMissions = 0;
+            Object.entries(missions).forEach(([day, tasks]) => {
+                const date = new Date();
+                date.setDate(date.getDate() - date.getDay() + ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].indexOf(day));
+                if (monthDays.includes(date.toISOString().split('T')[0])) {
+                    totalMonthMissions += tasks.length;
+                    completedMonthMissions += tasks.filter(m => m.completed).length;
+                }
+            });
+            const monthlyPercent = totalMonthMissions > 0 ? Math.round((completedMonthMissions / totalMonthMissions) * 100) : 0;
+            document.getElementById('monthlyProgressBar').style.width = `${monthlyPercent}%`;
+            document.getElementById('monthlyProgressBar').textContent = `${monthlyPercent}%`;
+            document.getElementById('monthlyProgressBar').setAttribute('aria-valuenow', monthlyPercent);
+        }
+
+        // Gamification
+        function updateGamification() {
+            const studyData = loadStudyData();
+            const totalMinutes = Object.values(studyData.dailyTotals).reduce((sum, min) => sum + min, 0);
+            const stars = Math.floor(totalMinutes / 60); // 1 star per hour
+            const level = Math.floor(totalMinutes / (5 * 60)); // 1 level per 5 hours
+            document.getElementById('starsEarned').innerHTML = '★'.repeat(stars);
+
+            document.getElementById('level').textContent = level;
+
+            // Suggestion based on subject distribution
+            const routine = loadRoutine();
+            const subjectTime = ['Biology', 'Math', 'Physics', 'Chemistry', 'Other']
+                .reduce((acc, subj) => ({ ...acc, [subj]: 0 }), {});
+            Object.values(routine).flat().forEach(session => {
+                const [startH, startM] = session.startTime.split(':').map(Number);
+                const [endH, endM] = session.endTime.split(':').map(Number);
+                const minutes = (endH * 60 + endM) - (startH * 60 + startM);
+                subjectTime[session.subject] += minutes;
+            });
+            const leastStudied = Object.entries(subjectTime)
+                .filter(([_, time]) => time > 0)
+                .sort((a, b) => a[1] - b[1])[0];
+            document.getElementById('suggestion').textContent = leastStudied
+                ? `Focus more on ${leastStudied[0]}`
+                : 'Add more study sessions to get suggestions';
+        }
+
+        // Reports
+        function updateReports() {
+            const studyData = loadStudyData();
+            const missions = loadMissions();
+            const notes = loadNotes();
+            const today = new Date().toISOString().split('T')[0];
+            const currentDay = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+            const monthDays = getCurrentMonthRange();
+
+            // Daily Report
+            document.getElementById('dailyStudyTime').textContent = `${studyData.dailyTotals[today] || 0} minutes`;
+            const todayMissions = missions[currentDay] || [];
+            document.getElementById('dailyMissions').textContent = `${todayMissions.filter(m => m.completed).length}/${todayMissions.length}`;
+            document.getElementById('dailyNotes').textContent = notes.filter(n => new Date(n.createdAt).toISOString().split('T')[0] === today).length;
+
+            // Monthly Summary
+            let totalMonthStudy = 0, totalMonthMissions = 0, completedMonthMissions = 0, monthNotes = 0;
+            monthDays.forEach(day => {
+                totalMonthStudy += studyData.dailyTotals[day] || 0;
+                const dayName = new Date(day).toLocaleDateString('en-US', { weekday: 'long' });
+                const dayMissions = missions[dayName] || [];
+                totalMonthMissions += dayMissions.length;
+                completedMonthMissions += dayMissions.filter(m => m.completed).length;
+            });
+            monthNotes = notes.filter(n => monthDays.includes(new Date(n.createdAt).toISOString().split('T')[0])).length;
+            document.getElementById('monthlyStudyTime').textContent = `${totalMonthStudy} minutes`;
+            document.getElementById('monthlyMissionRate').textContent = totalMonthMissions > 0
+                ? `${Math.round((completedMonthMissions / totalMonthMissions) * 100)}%`
+                : '0%';
+            document.getElementById('monthlyNotes').textContent = monthNotes;
+        }
+
+        // Personal Bests
+        function updatePersonalBests() {
+            const studyData = loadStudyData();
+            const missions = loadMissions();
+            const dailyTotals = Object.entries(studyData.dailyTotals);
+            const longestStudy = dailyTotals.sort((a, b) => b[1] - a[1])[0];
+            document.getElementById('longestStudyDay').textContent = longestStudy
+                ? `${new Date(longestStudy[0]).toLocaleDateString()} (${longestStudy[1]} minutes)`
+                : 'No study data';
+
+            let maxMissions = 0, maxMissionDay = '';
+            Object.entries(missions).forEach(([day, tasks]) => {
+                const completed = tasks.filter(m => m.completed).length;
+                if (completed > maxMissions) {
+                    maxMissions = completed;
+                    maxMissionDay = day;
+                }
+            });
+            document.getElementById('mostMissionsDay').textContent = maxMissions > 0
+                ? `${maxMissionDay} (${maxMissions} missions)`
+                : 'No missions completed';
+        }
+
+        // Week Comparison
+        function updateWeekComparison() {
+            const studyData = loadStudyData();
+            const currentWeek = getCurrentWeekRange();
+            const previousWeek = getPreviousWeekRange();
+            const currentWeekTotal = currentWeek.reduce((sum, day) => sum + (studyData.dailyTotals[day] || 0), 0);
+            const previousWeekTotal = previousWeek.reduce((sum, day) => sum + (studyData.dailyTotals[day] || 0), 0);
+            document.getElementById('currentWeekTime').textContent = `${currentWeekTotal} minutes`;
+            document.getElementById('previousWeekTime').textContent = `${previousWeekTotal} minutes`;
+        }
+
+        // Export Progress
+        function exportProgress() {
+            html2canvas(document.querySelector('.progress-container')).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `StudyBuddy_Progress_${new Date().toISOString().split('T')[0]}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+
+        // Initialize
+        function initialize() {
+            renderDailyStudyChart();
+            renderSubjectChart();
+            updateProgressBars();
+            updateGamification();
+            updateReports();
+            updatePersonalBests();
+            updateWeekComparison();
+        }
+
+        initialize();
+    </script>
+</body>
+</html>

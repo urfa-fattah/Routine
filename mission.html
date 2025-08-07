@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyBuddy - Mission Board</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+            padding-bottom: 60px; /* Space for fixed footer */
+        }
+        .navbar {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .mission-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .task-card {
+            padding: 10px;
+            margin: 5px 0;
+            border-left: 4px solid;
+            background-color: #fff;
+            border-radius: 4px;
+            cursor: move;
+        }
+        .task-card.dragging {
+            opacity: 0.5;
+        }
+        .priority-high { border-left-color: #dc3545; }
+        .priority-medium { border-left-color: #ffc107; }
+        .priority-low { border-left-color: #28a745; }
+        .completed { text-decoration: line-through; opacity: 0.7; }
+        .progress-bar {
+            transition: width 0.3s ease-in-out;
+        }
+        footer {
+            background-color: #343a40;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+        @media (max-width: 768px) {
+            .mission-container {
+                padding: 10px;
+            }
+            .task-card {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">StudyBuddy</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="routine.html">Routine</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="mission.html">Mission Board</a></li>
+                    <li class="nav-item"><a class="nav-link" href="exam-recap.html">Exam Recap</a></li>
+                    <li class="nav-item"><a class="nav-link" href="progress.html">Progress</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mission Board Content -->
+    <div class="mission-container">
+        <h1 class="text-center mb-4">Mission Board</h1>
+        <div class="mb-3">
+            <label for="daySelect" class="form-label">Select Day</label>
+            <select id="daySelect" class="form-select" onchange="displayMissions()">
+                <option value="Sunday">Sunday</option>
+                <option value="Monday">Monday</option>
+                <option value="Tuesday">Tuesday</option>
+                <option value="Wednesday">Wednesday</option>
+                <option value="Thursday">Thursday</option>
+                <option value="Friday">Friday</option>
+                <option value="Saturday">Saturday</option>
+            </select>
+        </div>
+
+        <!-- Add Task Form -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5>Add Mission</h5>
+                <form id="addMissionForm">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label for="timeBlock" class="form-label">Time Block</label>
+                            <select id="timeBlock" class="form-select" required>
+                                <option value="">Select a time block</option>
+                                <!-- Populated dynamically -->
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="subjectSelect" class="form-label">Subject</label>
+                            <select id="subjectSelect" class="form-select" required>
+                                <option value="Biology">Biology</option>
+                                <option value="Math">Math</option>
+                                <option value="Physics">Physics</option>
+                                <option value="Chemistry">Chemistry</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="taskInput" class="form-label">Task</label>
+                            <input type="text" id="taskInput" class="form-control" required placeholder="e.g., Photosynthesis basics">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="prioritySelect" class="form-label">Priority</label>
+                            <select id="prioritySelect" class="form-select" required>
+                                <option value="High">High</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Low">Low</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-success">Add Mission</button>
+                    <button type="button" class="btn btn-primary ms-2" onclick="requestNotificationPermission()">Enable Notifications</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Completion Progress -->
+        <div class="mb-4">
+            <h5>Daily Completion</h5>
+            <div class="progress">
+                <div id="completionBar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+            </div>
+        </div>
+
+        <!-- Missions Display -->
+        <div id="missionDisplay" class="card">
+            <div class="card-body">
+                <h5>Missions for <span id="displayDay"></span></h5>
+                <div id="taskList" class="task-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>© 2025 Urfa Hasan Fattah. All rights reserved.</p>
+    </footer>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
+    <script>
+        // LocalStorage Management
+        function loadRoutine() {
+            return JSON.parse(localStorage.getItem('studyRoutine')) || {
+                Sunday: [], Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [], Saturday: []
+            };
+        }
+
+        function loadMissions() {
+            return JSON.parse(localStorage.getItem('studyMissions')) || {
+                Sunday: [], Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [], Saturday: []
+            };
+        }
+
+        function saveMissions(missions) {
+            localStorage.setItem('studyMissions', JSON.stringify(missions));
+        }
+
+        // Populate Time Blocks
+        function populateTimeBlocks(day) {
+            const timeBlockSelect = document.getElementById('timeBlock');
+            timeBlockSelect.innerHTML = '<option value="">Select a time block</option>';
+            const routine = loadRoutine();
+            const sessions = routine[day] || [];
+            sessions.sort((a, b) => a.startTime.localeCompare(b.startTime)).forEach(session => {
+                const option = document.createElement('option');
+                option.value = `${session.startTime}-${session.endTime}`;
+                option.textContent = `${session.startTime} - ${session.endTime}: ${session.subject}`;
+                timeBlockSelect.appendChild(option);
+            });
+        }
+
+        // Display Missions
+        function displayMissions() {
+            const day = document.getElementById('daySelect').value;
+            document.getElementById('displayDay').textContent = day;
+            const missions = loadMissions();
+            const taskList = document.getElementById('taskList');
+            taskList.innerHTML = '';
+            const tasks = missions[day] || [];
+
+            // Update Completion Bar
+            const totalTasks = tasks.length;
+            const completedTasks = tasks.filter(task => task.completed).length;
+            const completionPercent = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+            const completionBar = document.getElementById('completionBar');
+            completionBar.style.width = `${completionPercent}%`;
+            completionBar.textContent = `${completionPercent}%`;
+            completionBar.setAttribute('aria-valuenow', completionPercent);
+
+            // Display Tasks
+            tasks.forEach((task, index) => {
+                const taskCard = document.createElement('div');
+                taskCard.className = `task-card priority-${task.priority.toLowerCase()} ${task.completed ? 'completed' : ''}`;
+                taskCard.setAttribute('draggable', true);
+                taskCard.setAttribute('data-index', index);
+                taskCard.innerHTML = `
+                    <span>${task.timeBlock}: ${task.subject} - ${task.task} (${task.priority})</span>
+                    <button class="btn btn-sm btn-success ms-2" onclick="toggleComplete('${day}', ${index})">${task.completed ? 'Undo' : 'Complete'}</button>
+                    <button class="btn btn-sm btn-warning ms-2" onclick="editTask('${day}', ${index})">Edit</button>
+                    <button class="btn btn-sm btn-danger ms-2" onclick="deleteTask('${day}', ${index})">Delete</button>
+                `;
+                taskList.appendChild(taskCard);
+            });
+
+            // Drag and Drop
+            taskList.addEventListener('dragstart', (e) => {
+                e.target.classList.add('dragging');
+                e.dataTransfer.setData('text/plain', `${day}:${e.target.dataset.index}`);
+            });
+            taskList.addEventListener('dragend', (e) => {
+                e.target.classList.remove('dragging');
+            });
+            taskList.addEventListener('dragover', (e) => e.preventDefault());
+            taskList.addEventListener('drop', (e) => {
+                e.preventDefault();
+                const [sourceDay, sourceIndex] = e.dataTransfer.getData('text/plain').split(':');
+                const targetIndex = Array.from(taskList.children).indexOf(e.target.closest('.task-card'));
+                if (targetIndex !== -1 && sourceDay === day) {
+                    const missions = loadMissions();
+                    const [task] = missions[day].splice(sourceIndex, 1);
+                    missions[day].splice(targetIndex, 0, task);
+                    saveMissions(missions);
+                    displayMissions();
+                }
+            });
+        }
+
+        // Add Mission
+        document.getElementById('addMissionForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const day = document.getElementById('daySelect').value;
+            const timeBlock = document.getElementById('timeBlock').value;
+            const subject = document.getElementById('subjectSelect').value;
+            const task = document.getElementById('taskInput').value;
+            const priority = document.getElementById('prioritySelect').value;
+
+            if (!timeBlock) {
+                alert('Please select a time block.');
+                return;
+            }
+
+            const missions = loadMissions();
+            missions[day].push({ timeBlock, subject, task, completed: false, priority });
+            saveMissions(missions);
+            displayMissions();
+            e.target.reset();
+            checkMissionReminder(day, timeBlock, subject, task);
+        });
+
+        // Toggle Completion
+        function toggleComplete(day, index) {
+            const missions = loadMissions();
+            missions[day][index].completed = !missions[day][index].completed;
+            saveMissions(missions);
+            displayMissions();
+        }
+
+        // Edit Task
+        function editTask(day, index) {
+            const missions = loadMissions();
+            const task = missions[day][index];
+            document.getElementById('timeBlock').value = task.timeBlock;
+            document.getElementById('subjectSelect').value = task.subject;
+            document.getElementById('taskInput').value = task.task;
+            document.getElementById('prioritySelect').value = task.priority;
+            missions[day].splice(index, 1);
+            saveMissions(missions);
+            displayMissions();
+        }
+
+        // Delete Task
+        function deleteTask(day, index) {
+            if (confirm('Delete this mission?')) {
+                const missions = loadMissions();
+                missions[day].splice(index, 1);
+                saveMissions(missions);
+                displayMissions();
+            }
+        }
+
+        // Notifications
+        function requestNotificationPermission() {
+            if (Notification.permission !== 'granted') {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        alert('Notifications enabled!');
+                    }
+                });
+            }
+        }
+
+        function checkMissionReminder(day, timeBlock, subject, task) {
+            if (Notification.permission === 'granted') {
+                const [startTime] = timeBlock.split('-');
+                const now = new Date();
+                const [hours, minutes] = startTime.split(':').map(Number);
+                const missionTime = new Date(now);
+                missionTime.setHours(hours, minutes, 0, 0);
+                const timeDiff = missionTime - now;
+                if (timeDiff > 0 && timeDiff <= 15 * 60 * 1000) { // Within 15 minutes
+                    setTimeout(() => {
+                        new Notification(`StudyBuddy Mission Reminder`, {
+                            body: `${subject}: ${task} at ${timeBlock}`,
+                            icon: 'https://via.placeholder.com/32' // Optional icon
+                        });
+                    }, timeDiff);
+                }
+            }
+        }
+
+        // Initialize
+        function initialize() {
+            const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+            document.getElementById('daySelect').value = today;
+            populateTimeBlocks(today);
+            displayMissions();
+            document.getElementById('daySelect').addEventListener('change', () => {
+                populateTimeBlocks(document.getElementById('daySelect').value);
+                displayMissions();
+            });
+        }
+
+        initialize();
+    </script>
+</body>
+</html>

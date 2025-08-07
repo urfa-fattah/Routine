@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyBuddy - Routine</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+        .navbar {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .routine-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .day-card {
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .time-block {
+            padding: 10px;
+            margin: 5px 0;
+            border-left: 4px solid;
+            background-color: #fff;
+            border-radius: 4px;
+            cursor: move;
+        }
+        .time-block.dragging {
+            opacity: 0.5;
+        }
+        .subject-biology { border-left-color: #28a745; }
+        .subject-math { border-left-color: #dc3545; }
+        .subject-physics { border-left-color: #007bff; }
+        .subject-chemistry { border-left-color: #ffc107; }
+        .subject-other { border-left-color: #6c757d; }
+        .icon-biology::before { content: "🌱"; margin-right: 5px; }
+        .icon-math::before { content: "📐"; margin-right: 5px; }
+        .icon-physics::before { content: "⚡️"; margin-right: 5px; }
+        .icon-chemistry::before { content: "🧪"; margin-right: 5px; }
+        .icon-other::before { content: "📚"; margin-right: 5px; }
+        footer {
+            background-color: #343a40;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+        @media (max-width: 768px) {
+            .routine-container {
+                padding: 10px;
+            }
+            .day-card {
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">StudyBuddy</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="routine.html">Routine</a></li>
+                    <li class="nav-item"><a class="nav-link" href="mission.html">Mission Board</a></li>
+                    <li class="nav-item"><a class="nav-link" href="exam-recap.html">Exam Recap</a></li>
+                    <li class="nav-item"><a class="nav-link" href="progress.html">Progress</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Routine Page Content -->
+    <div class="routine-container">
+        <h1 class="text-center mb-4">Weekly Study Routine</h1>
+        <div class="mb-3 text-center">
+            <button class="btn btn-danger" onclick="resetRoutine()">Reset Routine</button>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#copyDayModal">Copy Day</button>
+        </div>
+
+        <!-- Add Time Block Form -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5>Add Time Block</h5>
+                <form id="addTimeBlockForm">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label for="daySelect" class="form-label">Day</label>
+                            <select id="daySelect" class="form-select" required>
+                                <option value="Sunday">Sunday</option>
+                                <option value="Monday">Monday</option>
+                                <option value="Tuesday">Tuesday</option>
+                                <option value="Wednesday">Wednesday</option>
+                                <option value="Thursday">Thursday</option>
+                                <option value="Friday">Friday</option>
+                                <option value="Saturday">Saturday</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="timeStart" class="form-label">Start Time</label>
+                            <input type="time" id="timeStart" class="form-control" required>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="timeEnd" class="form-label">End Time</label>
+                            <input type="time" id="timeEnd" class="form-control" required>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="subjectSelect" class="form-label">Subject</label>
+                            <select id="subjectSelect" class="form-select" required>
+                                <option value="Biology">Biology</option>
+                                <option value="Math">Math</option>
+                                <option value="Physics">Physics</option>
+                                <option value="Chemistry">Chemistry</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-success">Add Block</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Weekly Routine Display -->
+        <div id="routineDisplay" class="row">
+            <!-- Days will be dynamically populated -->
+        </div>
+
+        <!-- Copy Day Modal -->
+        <div class="modal fade" id="copyDayModal" tabindex="-1" aria-labelledby="copyDayModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="copyDayModalLabel">Copy Day Schedule</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="copyDayForm">
+                            <div class="mb-3">
+                                <label for="sourceDay" class="form-label">Copy from</label>
+                                <select id="sourceDay" class="form-select" required>
+                                    <option value="Sunday">Sunday</option>
+                                    <option value="Monday">Monday</option>
+                                    <option value="Tuesday">Tuesday</option>
+                                    <option value="Wednesday">Wednesday</option>
+                                    <option value="Thursday">Thursday</option>
+                                    <option value="Friday">Friday</option>
+                                    <option value="Saturday">Saturday</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="targetDay" class="form-label">Copy to</label>
+                                <select id="targetDay" class="form-select" required>
+                                    <option value="Sunday">Sunday</option>
+                                    <option value="Monday">Monday</option>
+                                    <option value="Tuesday">Tuesday</option>
+                                    <option value="Wednesday">Wednesday</option>
+                                    <option value="Thursday">Thursday</option>
+                                    <option value="Friday">Friday</option>
+                                    <option value="Saturday">Saturday</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Copy</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>© 2025 Urfa Hasan Fattah. All rights reserved.</p>
+    </footer>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
+    <script>
+        // LocalStorage Management
+        function loadRoutine() {
+            return JSON.parse(localStorage.getItem('studyRoutine')) || {
+                Sunday: [], Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [], Saturday: []
+            };
+        }
+
+        function saveRoutine(routine) {
+            localStorage.setItem('studyRoutine', JSON.stringify(routine));
+        }
+
+        // Initialize Routine Display
+        function displayRoutine() {
+            const routine = loadRoutine();
+            const routineDisplay = document.getElementById('routineDisplay');
+            routineDisplay.innerHTML = '';
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+            days.forEach(day => {
+                const dayCard = document.createElement('div');
+                dayCard.className = 'col-md-4 col-sm-6 day-card';
+                dayCard.innerHTML = `<div class="card"><div class="card-body"><h5>${day}</h5><div class="time-block-container" data-day="${day}"></div></div></div>`;
+                routineDisplay.appendChild(dayCard);
+
+                const container = dayCard.querySelector('.time-block-container');
+                routine[day].sort((a, b) => a.startTime.localeCompare(b.startTime)).forEach((block, index) => {
+                    const blockElement = document.createElement('div');
+                    blockElement.className = `time-block subject-${block.subject.toLowerCase()} icon-${block.subject.toLowerCase()}`;
+                    blockElement.setAttribute('draggable', true);
+                    blockElement.setAttribute('data-index', index);
+                    blockElement.setAttribute('data-day', day);
+                    blockElement.innerHTML = `
+                        <span>${block.startTime} - ${block.endTime}: ${block.subject}</span>
+                        <button class="btn btn-sm btn-warning ms-2" onclick="editBlock('${day}', ${index})">Edit</button>
+                        <button class="btn btn-sm btn-danger ms-2" onclick="deleteBlock('${day}', ${index})">Delete</button>
+                    `;
+                    container.appendChild(blockElement);
+                });
+
+                // Drag and Drop
+                container.addEventListener('dragstart', (e) => {
+                    e.target.classList.add('dragging');
+                    e.dataTransfer.setData('text/plain', `${day}:${e.target.dataset.index}`);
+                });
+                container.addEventListener('dragend', (e) => {
+                    e.target.classList.remove('dragging');
+                });
+                container.addEventListener('dragover', (e) => e.preventDefault());
+                container.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    const [sourceDay, sourceIndex] = e.dataTransfer.getData('text/plain').split(':');
+                    const targetDay = day;
+                    const targetIndex = Array.from(container.children).indexOf(e.target.closest('.time-block'));
+                    if (targetIndex !== -1 && sourceDay === targetDay) {
+                        const routine = loadRoutine();
+                        const [block] = routine[sourceDay].splice(sourceIndex, 1);
+                        routine[targetDay].splice(targetIndex, 0, block);
+                        saveRoutine(routine);
+                        displayRoutine();
+                    }
+                });
+            });
+        }
+
+        // Add Time Block
+        document.getElementById('addTimeBlockForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const day = document.getElementById('daySelect').value;
+            const startTime = document.getElementById('timeStart').value;
+            const endTime = document.getElementById('timeEnd').value;
+            const subject = document.getElementById('subjectSelect').value;
+
+            // Validate Time Block
+            if (startTime >= endTime) {
+                alert('End time must be after start time.');
+                return;
+            }
+
+            // Check for Overlaps
+            const routine = loadRoutine();
+            const hasOverlap = routine[day].some(block =>
+                (startTime >= block.startTime && startTime < block.endTime) ||
+                (endTime > block.startTime && endTime <= block.endTime) ||
+                (startTime <= block.startTime && endTime >= block.endTime)
+            );
+            if (hasOverlap) {
+                alert('This time block overlaps with an existing session.');
+                return;
+            }
+
+            // Add Block
+            routine[day].push({ startTime, endTime, subject });
+            saveRoutine(routine);
+            displayRoutine();
+            e.target.reset();
+        });
+
+        // Edit Time Block
+        function editBlock(day, index) {
+            const routine = loadRoutine();
+            const block = routine[day][index];
+            document.getElementById('daySelect').value = day;
+            document.getElementById('timeStart').value = block.startTime;
+            document.getElementById('timeEnd').value = block.endTime;
+            document.getElementById('subjectSelect').value = block.subject;
+
+            // Delete old block and wait for new submission
+            routine[day].splice(index, 1);
+            saveRoutine(routine);
+            displayRoutine();
+        }
+
+        // Delete Time Block
+        function deleteBlock(day, index) {
+            if (confirm('Delete this time block?')) {
+                const routine = loadRoutine();
+                routine[day].splice(index, 1);
+                saveRoutine(routine);
+                displayRoutine();
+            }
+        }
+
+        // Reset Routine
+        function resetRoutine() {
+            if (confirm('Reset entire routine? This cannot be undone.')) {
+                const emptyRoutine = {
+                    Sunday: [], Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [], Saturday: []
+                };
+                saveRoutine(emptyRoutine);
+                displayRoutine();
+            }
+        }
+
+        // Copy Day Schedule
+        document.getElementById('copyDayForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const sourceDay = document.getElementById('sourceDay').value;
+            const targetDay = document.getElementById('targetDay').value;
+            if (sourceDay === targetDay) {
+                alert('Source and target day cannot be the same.');
+                return;
+            }
+            const routine = loadRoutine();
+            routine[targetDay] = JSON.parse(JSON.stringify(routine[sourceDay]));
+            saveRoutine(routine);
+            displayRoutine();
+            bootstrap.Modal.getInstance(document.getElementById('copyDayModal')).hide();
+        });
+
+        // Initialize
+        displayRoutine();
+    </script>
+</body>
+</html>

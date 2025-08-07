@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyBuddy - Exam Recap</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            padding-bottom: 60px; /* Space for fixed footer */
+            transition: background-color 0.3s, color 0.3s;
+        }
+        body.light-theme {
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        body.dark-theme {
+            background-color: #1a1a1a;
+            color: #f8f9fa;
+        }
+        .navbar {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .navbar.dark-theme {
+            background-color: #2c2c2c !important;
+        }
+        .recap-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .note-card {
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s, opacity 0.5s;
+            background-color: #fff;
+            margin-bottom: 20px;
+            opacity: 0;
+            animation: fadeIn 0.5s forwards;
+        }
+        .note-card.dark-theme {
+            background-color: #2c2c2c;
+            box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
+        }
+        .note-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .note-card.pinned {
+            border-left: 4px solid #007bff;
+            background-color: #e7f1ff;
+        }
+        .note-card.pinned.dark-theme {
+            background-color: #1e3a8a;
+        }
+        .note-image {
+            max-width: 100%;
+            max-height: 150px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .tag {
+            display: inline-block;
+            background-color: #6c757d;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin: 2px;
+        }
+        .tag.dark-theme {
+            background-color: #495057;
+        }
+        .study-mode-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .study-card {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        .study-card.dark-theme {
+            background-color: #2c2c2c;
+            color: #f8f9fa;
+        }
+        footer {
+            background-color: #343a40;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+        footer.dark-theme {
+            background-color: #1a1a1a;
+        }
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @media (max-width: 768px) {
+            .recap-container {
+                padding: 10px;
+            }
+            .note-card {
+                font-size: 0.9rem;
+            }
+            .study-card {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body class="light-theme">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">StudyBuddy</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="routine.html">Routine</a></li>
+                    <li class="nav-item"><a class="nav-link" href="mission.html">Mission Board</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="exam-recap.html">Exam Recap</a></li>
+                    <li class="nav-item"><a class="nav-link" href="progress.html">Progress</a></li>
+                    <li class="nav-item"><button class="btn btn-outline-secondary ms-2" onclick="toggleTheme()">Toggle Dark Mode</button></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Exam Recap Content -->
+    <div class="recap-container">
+        <h1 class="text-center mb-4">Exam Recap</h1>
+        <div class="mb-4 d-flex justify-content-between flex-wrap gap-2">
+            <div class="d-flex flex-wrap gap-2">
+                <input type="text" id="searchInput" class="form-control" style="max-width: 200px;" placeholder="Search notes or tags">
+                <select id="subjectFilter" class="form-select" style="max-width: 200px;">
+                    <option value="">All Subjects</option>
+                    <!-- Populated dynamically -->
+                </select>
+                <select id="tagFilter" class="form-select" style="max-width: 200px;">
+                    <option value="">All Tags</option>
+                    <!-- Populated dynamically -->
+                </select>
+                <select id="sortSelect" class="form-select" style="max-width: 200px;">
+                    <option value="pinned">Pinned First</option>
+                    <option value="date-desc">Newest First</option>
+                    <option value="date-asc">Oldest First</option>
+                    <option value="subject">Subject</option>
+                </select>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addNoteModal">Add Note</button>
+                <button class="btn btn-success" onclick="startStudyMode('flashcard')">Flashcard Mode</button>
+                <button class="btn btn-success" onclick="startStudyMode('slide')">Slide Mode</button>
+                <button class="btn btn-info" onclick="document.getElementById('importInput').click()">Import</button>
+                <button class="btn btn-info" onclick="exportNotes()">Export</button>
+                <input type="file" id="importInput" accept=".json" style="display: none;">
+            </div>
+        </div>
+
+        <!-- Notes Display -->
+        <div id="notesDisplay" class="row"></div>
+
+        <!-- Study Mode Container -->
+        <div id="studyModeContainer" class="study-mode-container">
+            <div class="study-card">
+                <h5 id="studySubject"></h5>
+                <p id="studyNote"></p>
+                <img id="studyImage" class="note-image d-none">
+                <p id="studyTags"></p>
+                <button class="btn btn-primary" id="prevNote">Previous</button>
+                <button class="btn btn-primary ms-2" id="nextNote">Next</button>
+                <button class="btn btn-danger ms-2" onclick="exitStudyMode()">Exit</button>
+            </div>
+        </div>
+
+        <!-- Add/Edit Note Modal -->
+        <div class="modal fade" id="addNoteModal" tabindex="-1" aria-labelledby="addNoteModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addNoteModalLabel">Add Note</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="addNoteForm">
+                            <div class="mb-3">
+                                <label for="subjectSelect" class="form-label">Subject</label>
+                                <select id="subjectSelect" class="form-select" required>
+                                    <option value="Biology">Biology</option>
+                                    <option value="Math">Math</option>
+                                    <option value="Physics">Physics</option>
+                                    <option value="Chemistry">Chemistry</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="noteInput" class="form-label">Note (max 500 characters)</label>
+                                <textarea id="noteInput" class="form-control" required rows="4" maxlength="500" placeholder="Enter key points for quick review"></textarea>
+                                <div class="form-text">Characters remaining: <span id="charCount">500</span></div>
+                            </div>
+                            <div class="mb-3 position-relative">
+                                <label for="tagsInput" class="form-label">Tags (comma-separated)</label>
+                                <input type="text" id="tagsInput" class="form-control" placeholder="e.g., formulas, key terms" autocomplete="off">
+                                <ul id="tagSuggestions" class="list-group position-absolute w-100" style="z-index: 1000; max-height: 150px; overflow-y: auto; display: none;"></ul>
+                            </div>
+                            <div class="mb-3">
+                                <label for="imageInput" class="form-label">Image (optional)</label>
+                                <input type="file" id="imageInput" class="form-control" accept="image/*">
+                                <img id="imagePreview" class="note-image d-none mt-2">
+                            </div>
+                            <input type="hidden" id="editIndex" value="-1">
+                            <button type="submit" class="btn btn-success">Save Note</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Container -->
+        <div class="toast-container">
+            <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                    <strong class="me-auto">Success</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>© 2025 Urfa Hasan Fattah. All rights reserved.</p>
+    </footer>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
+    <script>
+        // Theme Management
+        function setTheme(theme) {
+            document.body.className = theme + '-theme';
+            document.querySelector('nav').classList.toggle('dark-theme', theme === 'dark');
+            document.querySelector('footer').classList.toggle('dark-theme', theme === 'dark');
+            document.querySelectorAll('.note-card').forEach(card => card.classList.toggle('dark-theme', theme === 'dark'));
+            document.querySelectorAll('.tag').forEach(tag => tag.classList.toggle('dark-theme', theme === 'dark'));
+            document.querySelector('.study-card').classList.toggle('dark-theme', theme === 'dark');
+            localStorage.setItem('theme', theme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            setTheme(currentTheme === 'light' ? 'dark' : 'light');
+        }
+
+        // LocalStorage Management
+        function loadNotes() {
+            return JSON.parse(localStorage.getItem('examNotes')) || [];
+        }
+
+        function saveNotes(notes) {
+            localStorage.setItem('examNotes', JSON.stringify(notes));
+        }
+
+        // Compress Image
+        async function compressImage(file, maxSizeKB = 100) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.src = e.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        let width = img.width;
+                        let height = img.height;
+                        const maxDimension = 800;
+                        if (width > height && width > maxDimension) {
+                            height *= maxDimension / width;
+                            width = maxDimension;
+                        } else if (height > maxDimension) {
+                            width *= maxDimension / height;
+                            height = maxDimension;
+                        }
+                        canvas.width = width;
+                        canvas.height = height;
+                        ctx.drawImage(img, 0, 0, width, height);
+                        canvas.toBlob(
+                            (blob) => {
+                                resolve(URL.createObjectURL(blob));
+                            },
+                            'image/jpeg',
+                            0.7
+                        );
+                    };
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Display Notes
+        function displayNotes(filterSubject = '', filterTag = '', searchQuery = '', sortBy = 'pinned') {
+            const notes = loadNotes();
+            const notesDisplay = document.getElementById('notesDisplay');
+            notesDisplay.innerHTML = '';
+
+            // Filter and Search
+            let filteredNotes = notes
+                .filter(note => filterSubject ? note.subject === filterSubject : true)
+                .filter(note => filterTag ? note.tags.includes(filterTag) : true)
+                .filter(note => searchQuery ?
+                    note.note.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    note.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())) : true);
+
+            // Sort
+            if (sortBy === 'pinned') {
+                filteredNotes.sort((a, b) => b.pinned - a.pinned || b.createdAt - a.createdAt);
+            } else if (sortBy === 'date-desc') {
+                filteredNotes.sort((a, b) => b.createdAt - a.createdAt);
+            } else if (sortBy === 'date-asc') {
+                filteredNotes.sort((a, b) => a.createdAt - b.createdAt);
+            } else if (sortBy === 'subject') {
+                filteredNotes.sort((a, b) => a.subject.localeCompare(b.subject));
+            }
+
+            filteredNotes.forEach((note, index) => {
+                const noteCard = document.createElement('div');
+                noteCard.className = `col-md-4 col-sm-6 note-card ${note.pinned ? 'pinned' : ''} ${localStorage.getItem('theme') === 'dark' ? 'dark-theme' : ''}`;
+                noteCard.innerHTML = `
+                    <div class="card">
+                        <div class="card-body">
+                            <h5>${note.subject}</h5>
+                            <p>${note.note}</p>
+                            ${note.image ? `<img src="${note.image}" class="note-image">` : ''}
+                            <div>${note.tags.map(tag => `<span class="tag ${localStorage.getItem('theme') === 'dark' ? 'dark-theme' : ''}">${tag}</span>`).join('')}</div>
+                            <button class="btn btn-sm btn-primary mt-2" onclick="togglePin(${index})">${note.pinned ? 'Unpin' : 'Pin'}</button>
+                            <button class="btn btn-sm btn-warning mt-2 ms-2" onclick="editNote(${index})">Edit</button>
+                            <button class="btn btn-sm btn-danger mt-2 ms-2" onclick="deleteNote(${index})">Delete</button>
+                        </div>
+                    </div>
+                `;
+                notesDisplay.appendChild(noteCard);
+            });
+
+            // Update Tag Filter
+            const allTags = [...new Set(notes.flatMap(note => note.tags))];
+            const tagFilter = document.getElementById('tagFilter');
+            tagFilter.innerHTML = '<option value="">All Tags</option>';
+            allTags.forEach(tag => {
+                const option = document.createElement('option');
+                option.value = tag;
+                option.textContent = tag;
+                tagFilter.appendChild(option);
+            });
+        }
+
+        // Add/Edit Note
+        document.getElementById('addNoteForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const subject = document.getElementById('subjectSelect').value;
+            const note = document.getElementById('noteInput').value;
+            const tags = document.getElementById('tagsInput').value.split(',').map(t => t.trim()).filter(t => t);
+            const imageInput = document.getElementById('imageInput').files[0];
+            const editIndex = parseInt(document.getElementById('editIndex').value);
+            let image = null;
+
+            if (imageInput) {
+                image = await compressImage(imageInput);
+            }
+
+            const notes = loadNotes();
+            const noteData = {
+                subject,
+                note,
+                tags,
+                image,
+                pinned: editIndex >= 0 ? notes[editIndex].pinned : false,
+                createdAt: editIndex >= 0 ? notes[editIndex].createdAt : Date.now()
+            };
+
+            if (editIndex >= 0) {
+                notes[editIndex] = noteData;
+                showToast('Note updated successfully!');
+            } else {
+                notes.push(noteData);
+                showToast('Note added successfully!');
+            }
+
+            saveNotes(notes);
+            displayNotes();
+            bootstrap.Modal.getInstance(document.getElementById('addNoteModal')).hide();
+            e.target.reset();
+            document.getElementById('editIndex').value = '-1';
+            document.getElementById('imagePreview').classList.add('d-none');
+        });
+
+        // Toggle Pin
+        function togglePin(index) {
+            const notes = loadNotes();
+            notes[index].pinned = !notes[index].pinned;
+            saveNotes(notes);
+            displayNotes();
+            showToast(notes[index].pinned ? 'Note pinned!' : 'Note unpinned!');
+        }
+
+        // Edit Note
+        function editNote(index) {
+            const notes = loadNotes();
+            const note = notes[index];
+            document.getElementById('subjectSelect').value = note.subject;
+            document.getElementById('noteInput').value = note.note;
+            document.getElementById('tagsInput').value = note.tags.join(', ');
+            document.getElementById('editIndex').value = index;
+            document.getElementById('imagePreview').classList.toggle('d-none', !note.image);
+            if (note.image) document.getElementById('imagePreview').src = note.image;
+            document.getElementById('addNoteModalLabel').textContent = 'Edit Note';
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('addNoteModal')).show();
+        }
+
+        // Delete Note
+        function deleteNote(index) {
+            if (confirm('Delete this note?')) {
+                const notes = loadNotes();
+                notes.splice(index, 1);
+                saveNotes(notes);
+                displayNotes();
+                showToast('Note deleted successfully!');
+            }
+        }
+
+        // Study Mode
+        let studyNotes = [];
+        let currentStudyIndex = 0;
+        let studyModeType = '';
+
+        function startStudyMode(mode) {
+            studyModeType = mode;
+            const notes = loadNotes();
+            studyNotes = notes.sort((a, b) => b.pinned - a.pinned || b.createdAt - a.createdAt);
+            if (studyNotes.length === 0) {
+                showToast('No notes available for study mode.', 'danger');
+                return;
+            }
+            currentStudyIndex = 0;
+            document.getElementById('studyModeContainer').style.display = 'flex';
+            updateStudyCard();
+        }
+
+        function updateStudyCard() {
+            if (studyNotes.length === 0) return;
+            const note = studyNotes[currentStudyIndex];
+            document.getElementById('studySubject').textContent = note.subject;
+            document.getElementById('studyNote').textContent = studyModeType === 'flashcard' ? 'Click to reveal' : note.note;
+            document.getElementById('studyImage').classList.toggle('d-none', !note.image);
+            if (note.image) document.getElementById('studyImage').src = note.image;
+            document.getElementById('studyTags').textContent = note.tags.join(', ');
+            document.getElementById('prevNote').disabled = currentStudyIndex === 0;
+            document.getElementById('nextNote').disabled = currentStudyIndex === studyNotes.length - 1;
+            document.querySelector('.study-card').classList.toggle('dark-theme', localStorage.getItem('theme') === 'dark');
+
+            if (studyModeType === 'flashcard') {
+                document.getElementById('studyNote').onclick = () => {
+                    document.getElementById('studyNote').textContent = note.note;
+                    document.getElementById('studyNote').onclick = null;
+                };
+            } else {
+                document.getElementById('studyNote').onclick = null;
+            }
+        }
+
+        function exitStudyMode() {
+            document.getElementById('studyModeContainer').style.display = 'none';
+            document.getElementById('studyNote').onclick = null;
+        }
+
+        document.getElementById('prevNote').addEventListener('click', () => {
+            if (currentStudyIndex > 0) {
+                currentStudyIndex--;
+                updateStudyCard();
+            }
+        });
+
+        document.getElementById('nextNote').addEventListener('click', () => {
+            if (currentStudyIndex < studyNotes.length - 1) {
+                currentStudyIndex++;
+                updateStudyCard();
+            }
+        });
+
+        // Keyboard Navigation for Study Mode
+        document.addEventListener('keydown', (e) => {
+            if (document.getElementById('studyModeContainer').style.display === 'flex') {
+                if (e.key === 'ArrowLeft' && currentStudyIndex > 0) {
+                    currentStudyIndex--;
+                    updateStudyCard();
+                } else if (e.key === 'ArrowRight' && currentStudyIndex < studyNotes.length - 1) {
+                    currentStudyIndex++;
+                    updateStudyCard();
+                } else if (e.key === 'Escape') {
+                    exitStudyMode();
+                }
+            }
+        });
+
+        // Search and Filter
+        function applyFilters() {
+            const searchQuery = document.getElementById('searchInput').value;
+            const filterSubject = document.getElementById('subjectFilter').value;
+            const filterTag = document.getElementById('tagFilter').value;
+            const sortBy = document.getElementById('sortSelect').value;
+            displayNotes(filterSubject, filterTag, searchQuery, sortBy);
+        }
+
+        document.getElementById('searchInput').addEventListener('input', applyFilters);
+        document.getElementById('subjectFilter').addEventListener('change', applyFilters);
+        document.getElementById('tagFilter').addEventListener('change', applyFilters);
+        document.getElementById('sortSelect').addEventListener('change', applyFilters);
+
+        // Tag Autocomplete
+        function updateTagSuggestions() {
+            const input = document.getElementById('tagsInput').value;
+            const lastTag = input.split(',').pop().trim().toLowerCase();
+            const suggestions = document.getElementById('tagSuggestions');
+            suggestions.innerHTML = '';
+            if (lastTag) {
+                const notes = loadNotes();
+                const allTags = [...new Set(notes.flatMap(note => note.tags))];
+                const matchingTags = allTags.filter(tag => tag.toLowerCase().startsWith(lastTag));
+                if (matchingTags.length > 0) {
+                    suggestions.style.display = 'block';
+                    matchingTags.forEach(tag => {
+                        const li = document.createElement('li');
+                        li.className = 'list-group-item';
+                        li.textContent = tag;
+                        li.onclick = () => {
+                            const tags = document.getElementById('tagsInput').value.split(',');
+                            tags[tags.length - 1] = tag;
+                            document.getElementById('tagsInput').value = tags.join(', ');
+                            suggestions.style.display = 'none';
+                        };
+                        suggestions.appendChild(li);
+                    });
+                } else {
+                    suggestions.style.display = 'none';
+                }
+            } else {
+                suggestions.style.display = 'none';
+            }
+        }
+
+        document.getElementById('tagsInput').addEventListener('input', updateTagSuggestions);
+
+        // Image Preview
+        document.getElementById('imageInput').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const preview = document.getElementById('imagePreview');
+                preview.src = await compressImage(file);
+                preview.classList.remove('d-none');
+            }
+        });
+
+        // Character Count
+        document.getElementById('noteInput').addEventListener('input', () => {
+            const count = 500 - document.getElementById('noteInput').value.length;
+            document.getElementById('charCount').textContent = count;
+        });
+
+        // Import/Export
+        function exportNotes() {
+            const notes = loadNotes();
+            const blob = new Blob([JSON.stringify(notes, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.download = `StudyBuddy_Notes_${new Date().toISOString().split('T')[0]}.json`;
+            link.href = URL.createObjectURL(blob);
+            link.click();
+            showToast('Notes exported successfully!');
+        }
+
+        document.getElementById('importInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const importedNotes = JSON.parse(event.target.result);
+                        if (Array.isArray(importedNotes)) {
+                            saveNotes(importedNotes);
+                            displayNotes();
+                            showToast('Notes imported successfully!');
+                        } else {
+                            showToast('Invalid JSON format.', 'danger');
+                        }
+                    } catch {
+                        showToast('Error importing notes.', 'danger');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        // Toast Notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('successToast');
+            toast.querySelector('.toast-body').textContent = message;
+            toast.classList.remove('bg-success', 'bg-danger');
+            toast.classList.add(`bg-${type}`);
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+        }
+
+        // Initialize
+        function initialize() {
+            // Apply Theme
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            setTheme(savedTheme);
+
+            // Populate Subject Filter
+            const subjectFilter = document.getElementById('subjectFilter');
+            subjectFilter.innerHTML = '<option value="">All Subjects</option>';
+            ['Biology', 'Math', 'Physics', 'Chemistry', 'Other'].forEach(subject => {
+                const option = document.createElement('option');
+                option.value = subject;
+                option.textContent = subject;
+                subjectFilter.appendChild(option);
+            });
+
+            // Reset Modal on Close
+            document.getElementById('addNoteModal').addEventListener('hidden.bs.modal', () => {
+                document.getElementById('addNoteForm').reset();
+                document.getElementById('editIndex').value = '-1';
+                document.getElementById('imagePreview').classList.add('d-none');
+                document.getElementById('addNoteModalLabel').textContent = 'Add Note';
+                document.getElementById('charCount').textContent = '500';
+                document.getElementById('tagSuggestions').style.display = 'none';
+            });
+
+            displayNotes();
+        }
+
+        initialize();
+    </script>
+</body>
+</html>

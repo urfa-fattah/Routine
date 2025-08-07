@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyBuddy - Home</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+            padding-bottom: 60px; /* Space for fixed footer */
+        }
+        .navbar {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .card {
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .current-session, .upcoming-session, .mission-card {
+            background-color: #fff;
+        }
+        .timer {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .quote-card {
+            font-style: italic;
+            color: #555;
+        }
+        .mission-card {
+            border-left: 4px solid #28a745; /* Green border for missions */
+        }
+        .pomodoro-btn {
+            background-color: #28a745;
+            color: white;
+        }
+        .pomodoro-btn:hover {
+            background-color: #218838;
+        }
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 10px;
+            }
+            .timer {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">StudyBuddy</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link active" href="index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="routine.html">Routine</a></li>
+                    <li class="nav-item"><a class="nav-link" href="mission.html">Mission Board</a></li>
+                    <li class="nav-item"><a class="nav-link" href="exam-recap.html">Exam Recap</a></li>
+                    <li class="nav-item"><a class="nav-link" href="progress.html">Progress</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Content -->
+    <div class="dashboard-container">
+        <h1 class="text-center mb-4">Study Dashboard</h1>
+        <div class="row">
+            <!-- Live Time and Day -->
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5>Current Time & Day</h5>
+                        <p id="liveTime" class="timer"></p>
+                        <p id="currentDay"></p>
+                    </div>
+                </div>
+            </div>
+            <!-- Current Session -->
+            <div class="col-md-4 mb-4">
+                <div class="card current-session">
+                    <div class="card-body">
+                        <h5>Current Session</h5>
+                        <p id="currentSession">No active session</p>
+                        <p id="countdownTimer" class="timer"></p>
+                    </div>
+                </div>
+            </div>
+            <!-- Stopwatch -->
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5>Study Stopwatch</h5>
+                        <p id="stopwatch" class="timer">00:00:00</p>
+                        <button class="btn btn-primary" onclick="startStopwatch()">Start</button>
+                        <button class="btn btn-warning" onclick="pauseStopwatch()">Pause</button>
+                        <button class="btn btn-danger" onclick="resetStopwatch()">Reset</button>
+                        <button class="btn pomodoro-btn mt-2" onclick="startPomodoro()">Start Pomodoro</button>
+                    </div>
+                </div>
+            </div>
+            <!-- Daily Study Total -->
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Daily Study Total</h5>
+                        <p id="dailyTotal">0 minutes</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Upcoming Session -->
+            <div class="col-md-4 mb-4">
+                <div class="card upcoming-session">
+                    <div class="card-body">
+                        <h5>Upcoming Session</h5>
+                        <p id="upcomingSession">No upcoming sessions today</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Today's Mission -->
+            <div class="col-md-4 mb-4">
+                <div class="card mission-card">
+                    <div class="card-body">
+                        <h5>Today's Mission</h5>
+                        <p id="todayMission">No missions set (see Mission Board)</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Motivational Quote -->
+            <div class="col-12">
+                <div class="card quote-card">
+                    <div class="card-body text-center">
+                        <h5>Quote of the Day</h5>
+                        <p id="motivationalQuote"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>© 2025 Urfa Hasan Fattah. All rights reserved.</p>
+    </footer>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
+    <script>
+        // LocalStorage Management
+        function loadRoutine() {
+            return JSON.parse(localStorage.getItem('studyRoutine')) || {
+                Sunday: [], Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [], Saturday: []
+            };
+        }
+
+        function loadMissions() {
+            return JSON.parse(localStorage.getItem('studyMissions')) || {
+                Sunday: [], Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [], Saturday: []
+            };
+        }
+
+        function loadStudyData() {
+            return JSON.parse(localStorage.getItem('studyData')) || {
+                dailyTotals: {}, // { "YYYY-MM-DD": minutes }
+                pomodoroSessions: 0
+            };
+        }
+
+        function saveStudyData(data) {
+            localStorage.setItem('studyData', JSON.stringify(data));
+        }
+
+        // Live Time and Day
+        function updateLiveTime() {
+            const now = new Date();
+            document.getElementById('liveTime').textContent = now.toLocaleTimeString();
+            document.getElementById('currentDay').textContent = now.toLocaleDateString('en-US', { weekday: 'long' });
+        }
+
+        // Current and Upcoming Sessions, Today's Mission
+        function updateSessions() {
+            const now = new Date();
+            const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' });
+            const currentTime = now.toTimeString().slice(0, 5); // HH:MM
+            const routine = loadRoutine();
+            const missions = loadMissions();
+            const todaySessions = routine[currentDay] || [];
+            const todayMissions = missions[currentDay] || [];
+
+            // Current Session
+            const currentSession = todaySessions.find(session =>
+                currentTime >= session.startTime && currentTime < session.endTime
+            );
+            document.getElementById('currentSession').textContent = currentSession
+                ? `${currentSession.startTime} - ${currentSession.endTime}: ${currentSession.subject}`
+                : 'No active session';
+
+            // Countdown Timer
+            if (currentSession) {
+                const [hours, minutes] = currentSession.endTime.split(':').map(Number);
+                const endTime = new Date(now);
+                endTime.setHours(hours, minutes, 0, 0);
+                const timeLeft = endTime - now;
+                if (timeLeft > 0) {
+                    const minutesLeft = Math.floor(timeLeft / 1000 / 60);
+                    const secondsLeft = Math.floor((timeLeft / 1000) % 60);
+                    document.getElementById('countdownTimer').textContent = `${minutesLeft}m ${secondsLeft}s left`;
+                } else {
+                    document.getElementById('countdownTimer').textContent = '';
+                }
+            } else {
+                document.getElementById('countdownTimer').textContent = '';
+            }
+
+            // Upcoming Session
+            const upcomingSession = todaySessions
+                .filter(session => session.startTime > currentTime)
+                .sort((a, b) => a.startTime.localeCompare(b.startTime))[0];
+            document.getElementById('upcomingSession').textContent = upcomingSession
+                ? `${upcomingSession.startTime} - ${upcomingSession.endTime}: ${upcomingSession.subject}`
+                : 'No upcoming sessions today';
+
+            // Today's Mission
+            const currentMission = todayMissions.find(mission => {
+                const [startTime, endTime] = mission.timeBlock.split('-');
+                return currentTime >= startTime && currentTime < endTime && !mission.completed;
+            });
+            document.getElementById('todayMission').textContent = currentMission
+                ? `${currentMission.timeBlock}: ${currentMission.subject} - ${currentMission.task} (${currentMission.priority})`
+                : 'No active missions (see Mission Board)';
+
+            // Missed Session Alert
+            const missedSessions = todaySessions.filter(session =>
+                session.endTime < currentTime && !session.completed
+            );
+            if (missedSessions.length > 0) {
+                alert(`Missed sessions: ${missedSessions.map(s => `${s.startTime} ${s.subject}`).join(', ')}`);
+                missedSessions.forEach(session => session.completed = true);
+                saveRoutine(routine);
+            }
+        }
+
+        // Stopwatch
+        let stopwatchInterval = null;
+        let stopwatchSeconds = 0;
+        let isPomodoro = false;
+        let pomodoroPhase = 'work'; // work or break
+        let pomodoroTimeLeft = 25 * 60; // 25 minutes default
+
+        function updateStopwatch() {
+            const hours = Math.floor(stopwatchSeconds / 3600);
+            const minutes = Math.floor((stopwatchSeconds % 3600) / 60);
+            const seconds = stopwatchSeconds % 60;
+            document.getElementById('stopwatch').textContent =
+                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function startStopwatch() {
+            if (!stopwatchInterval) {
+                stopwatchInterval = setInterval(() => {
+                    stopwatchSeconds++;
+                    updateStopwatch();
+                    if (isPomodoro) {
+                        pomodoroTimeLeft--;
+                        if (pomodoroTimeLeft <= 0) {
+                            if (pomodoroPhase === 'work') {
+                                pomodoroPhase = 'break';
+                                pomodoroTimeLeft = 5 * 60; // 5-minute break
+                                alert('Work session complete! Take a 5-minute break.');
+                            } else {
+                                pomodoroPhase = 'work';
+                                pomodoroTimeLeft = 25 * 60; // 25-minute work
+                                const studyData = loadStudyData();
+                                studyData.pomodoroSessions = (studyData.pomodoroSessions || 0) + 1;
+                                saveStudyData(studyData);
+                                alert('Break over! Start next work session.');
+                            }
+                        }
+                    }
+                }, 1000);
+            }
+        }
+
+        function pauseStopwatch() {
+            clearInterval(stopwatchInterval);
+            stopwatchInterval = null;
+            if (!isPomodoro) {
+                updateDailyTotal();
+            }
+        }
+
+        function resetStopwatch() {
+            clearInterval(stopwatchInterval);
+            stopwatchInterval = null;
+            stopwatchSeconds = 0;
+            isPomodoro = false;
+            pomodoroPhase = 'work';
+            pomodoroTimeLeft = 25 * 60;
+            updateStopwatch();
+            updateDailyTotal();
+        }
+
+        function startPomodoro() {
+            if (!stopwatchInterval) {
+                isPomodoro = true;
+                pomodoroPhase = 'work';
+                pomodoroTimeLeft = 25 * 60;
+                startStopwatch();
+            }
+        }
+
+        function updateDailyTotal() {
+            const studyData = loadStudyData();
+            const today = new Date().toISOString().split('T')[0];
+            studyData.dailyTotals[today] = (studyData.dailyTotals[today] || 0) + Math.floor(stopwatchSeconds / 60);
+            saveStudyData(studyData);
+            document.getElementById('dailyTotal').textContent = `${studyData.dailyTotals[today] || 0} minutes`;
+        }
+
+        // Motivational Quote
+        const quotes = [
+            "The future belongs to those who prepare for it today. – Malcolm X",
+            "Success is the sum of small efforts, repeated day in and day out. – Robert Collier",
+            "You don’t have to be great to start, but you have to start to be great. – Zig Ziglar",
+            "The only way to do great work is to love what you do. – Steve Jobs"
+        ];
+
+        function updateQuote() {
+            const quoteIndex = Math.floor(new Date().getDate() % quotes.length);
+            document.getElementById('motivationalQuote').textContent = quotes[quoteIndex];
+        }
+
+        // Initialize
+        function initialize() {
+            updateLiveTime();
+            updateSessions();
+            updateQuote();
+            const studyData = loadStudyData();
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('dailyTotal').textContent = `${studyData.dailyTotals[today] || 0} minutes`;
+            setInterval(updateLiveTime, 1000);
+            setInterval(updateSessions, 60000); // Update sessions and missions every minute
+        }
+
+        initialize();
+    </script>
+</body>
+</html>
