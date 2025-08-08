@@ -6,59 +6,348 @@
     <title>StudyBuddy - Home</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
         body {
-            background-color: #f8f9fa;
-            font-family: 'Arial', sans-serif;
-            padding-bottom: 60px; /* Space for fixed footer */
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #2a0645, #6b21a8); /* New purple-violet gradient */
+            color: #e2e8f0;
+            padding-bottom: 50px;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
         .navbar {
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            background: rgba(30, 10, 60, 0.4) !important; /* Matches gradient */
+            backdrop-filter: blur(12px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0 0 12px 12px;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        .navbar-brand, .nav-link {
+            color: #e2e8f0 !important;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            transition: color 0.3s, transform 0.3s;
+        }
+        .nav-link:hover {
+            color: #60a5fa !important;
+            transform: scale(1.05);
+        }
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%2360a5fa' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
         }
         .dashboard-container {
             max-width: 1200px;
-            margin: 20px auto;
-            padding: 20px;
+            margin: 90px auto 30px;
+            padding: 30px;
         }
         .card {
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        .current-session, .upcoming-session, .mission-card {
-            background-color: #fff;
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+        }
+        .card h5 {
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            color: #60a5fa; /* Highlighted heading */
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
         }
         .timer {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #007bff;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #facc15; /* Yellow highlight */
+        }
+        .session-timer {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 10px 20px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            z-index: 1001;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .session-timer:hover {
+            transform: scale(1.05);
+        }
+        .session-timer.green { background: rgba(34, 197, 94, 0.3); }
+        .session-timer.yellow { background: rgba(234, 179, 8, 0.3); }
+        .session-timer.red { background: rgba(239, 68, 68, 0.3); }
+        .chatbot-panel {
+            position: fixed;
+            top: 70px;
+            right: -300px;
+            width: 300px;
+            height: calc(100vh - 130px);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px 0 0 12px;
+            box-shadow: -4px 0 16px rgba(0, 0, 0, 0.3);
+            z-index: 998;
+            transition: right 0.3s ease-in-out;
+            display: flex;
+            flex-direction: column;
+        }
+        .chatbot-panel.open {
+            right: 0;
+        }
+        .chatbot-header {
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 12px 0 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .chatbot-header h5 {
+            margin: 0;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            color: #60a5fa;
+        }
+        .chatbot-header .close-btn, .chatbot-header .clear-btn {
+            background: transparent;
+            border: none;
+            color: #e2e8f0;
+            font-size: 1.3rem;
+            transition: color 0.3s, transform 0.3s;
+        }
+        .chatbot-header .close-btn:hover, .chatbot-header .clear-btn:hover {
+            color: #ef4444;
+            transform: scale(1.1);
+        }
+        .chatbot-body {
+            flex: 1;
+            padding: 12px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .chatbot-message {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 10px 14px;
+            border-radius: 10px;
+            max-width: 80%;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.5s ease;
+        }
+        .chatbot-message.user {
+            background: rgba(167, 139, 250, 0.3); /* Matches gradient */
+            align-self: flex-end;
+        }
+        .chatbot-suggestions {
+            padding: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .chatbot-suggestion {
+            background: linear-gradient(45deg, #a78bfa, #7c3aed); /* Matches gradient */
+            border: none;
+            border-radius: 16px;
+            padding: 6px 12px;
+            color: #fff;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: transform 0.3s, background 0.3s;
+            animation: slideIn 0.5s ease;
+        }
+        .chatbot-suggestion:hover {
+            transform: scale(1.05);
+            background: linear-gradient(45deg, #7c3aed, #a78bfa);
+        }
+        .chatbot-footer {
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.15);
+        }
+        .chatbot-footer input {
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #e2e8f0;
+        }
+        .chatbot-footer input::placeholder {
+            color: #94a3b8;
+        }
+        .chatbot-footer .btn {
+            background: linear-gradient(45deg, #a78bfa, #7c3aed);
+            border: none;
+            border-radius: 20px;
+            transition: transform 0.3s;
+        }
+        .chatbot-footer .btn:hover {
+            transform: scale(1.05);
+            background: linear-gradient(45deg, #7c3aed, #a78bfa);
+        }
+        .chatbot-toggle {
+            position: fixed;
+            bottom: 70px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1001;
+            animation: pulse 1.5s infinite;
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        .chatbot-toggle:hover {
+            transform: scale(1.1);
+        }
+        .chatbot-toggle.open {
+            opacity: 0.7;
+        }
+        .chatbot-toggle i {
+            font-size: 1.5rem;
+            color: #e2e8f0;
         }
         .quote-card {
             font-style: italic;
-            color: #555;
-        }
-        .mission-card {
-            border-left: 4px solid #28a745; /* Green border for missions */
+            background: rgba(255, 255, 255, 0.12);
         }
         .pomodoro-btn {
-            background-color: #28a745;
-            color: white;
+            background: linear-gradient(45deg, #22c55e, #34d399);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            transition: transform 0.3s, background 0.3s;
         }
         .pomodoro-btn:hover {
-            background-color: #218838;
+            background: linear-gradient(45deg, #16a34a, #22c55e);
+            transform: scale(1.05);
+        }
+        .btn-primary, .btn-warning, .btn-danger {
+            border-radius: 8px;
+            transition: transform 0.3s, background 0.3s;
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #a78bfa, #7c3aed);
+            border: none;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(45deg, #7c3aed, #a78bfa);
+            transform: scale(1.05);
+        }
+        .btn-warning {
+            background: linear-gradient(45deg, #eab308, #facc15);
+            border: none;
+        }
+        .btn-warning:hover {
+            background: linear-gradient(45deg, #ca8a04, #eab308);
+            transform: scale(1.05);
+        }
+        .btn-danger {
+            background: linear-gradient(45deg, #ef4444, #f87171);
+            border: none;
+        }
+        .btn-danger:hover {
+            background: linear-gradient(45deg, #dc2626, #ef4444);
+            transform: scale(1.05);
+        }
+        .star {
+            color: #facc15;
+        }
+        footer {
+            background: rgba(30, 10, 60, 0.7);
+            backdrop-filter: blur(12px);
+            color: #e2e8f0;
+            text-align: center;
+            padding: 8px 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(10px); }
+            to { opacity: 1; transform: translateX(0); }
         }
         @media (max-width: 768px) {
             .dashboard-container {
-                padding: 10px;
+                margin-top: 100px;
+                padding: 15px;
             }
             .timer {
-                font-size: 1.5rem;
+                font-size: 1.3rem;
+            }
+            .session-timer {
+                top: 60px;
+                right: 10px;
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+            .chatbot-panel {
+                width: 250px;
+                right: -250px;
+                height: calc(100vh - 120px);
+            }
+            .chatbot-panel.open {
+                right: 0;
+            }
+            .chatbot-toggle {
+                bottom: 60px;
+                right: 10px;
+                width: 40px;
+                height: 40px;
+            }
+            .chatbot-toggle i {
+                font-size: 1.2rem;
+            }
+            .chatbot-suggestion {
+                font-size: 0.75rem;
+                padding: 5px 10px;
+            }
+            .chatbot-header h5 {
+                font-size: 1rem;
+            }
+            .chatbot-message {
+                font-size: 0.85rem;
+            }
+            .card h5 {
+                font-size: 1.1rem;
             }
         }
     </style>
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container-fluid">
             <a class="navbar-brand" href="index.html">StudyBuddy</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -76,15 +365,57 @@
         </div>
     </nav>
 
+    <!-- Session Timer -->
+    <div id="sessionTimer" class="session-timer green">
+        <i class="fas fa-clock me-2"></i>
+        <span id="countdownTimer">No active session</span>
+    </div>
+
+    <!-- Chatbot Toggle -->
+    <div class="chatbot-toggle" id="chatbotToggle" onclick="toggleChatbot()">
+        <i class="fas fa-robot"></i>
+    </div>
+
+    <!-- Chatbot Panel -->
+    <div class="chatbot-panel" id="chatbotPanel">
+        <div class="chatbot-header">
+            <h5>StudyBuddy Assistant</h5>
+            <div>
+                <button class="clear-btn" onclick="clearChat()"><i class="fas fa-trash"></i></button>
+                <button class="close-btn" onclick="closeChatbot()"><i class="fas fa-times"></i></button>
+            </div>
+        </div>
+        <div class="chatbot-body" id="chatbotMessages">
+            <div class="chatbot-message">
+                Welcome to StudyBuddy! I'm here to help. Earn <b>1 star per study hour</b> and <b>1 level per 5 hours</b>. Try the suggestions below or ask me anything!
+            </div>
+        </div>
+        <div class="chatbot-suggestions">
+            <button class="chatbot-suggestion" onclick="sendSuggestion('stopwatch')">How do I use the stopwatch?</button>
+            <button class="chatbot-suggestion" onclick="sendSuggestion('pomodoro')">What is Pomodoro mode?</button>
+            <button class="chatbot-suggestion" onclick="sendSuggestion('stars')">How do I earn stars?</button>
+            <button class="chatbot-suggestion" onclick="sendSuggestion('missions')">How do missions work?</button>
+            <button class="chatbot-suggestion" onclick="sendSuggestion('notes')">How do I take notes?</button>
+        </div>
+        <div class="chatbot-footer">
+            <form id="chatbotForm">
+                <div class="input-group">
+                    <input type="text" id="chatbotInput" class="form-control" placeholder="Ask me something..." autocomplete="off">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Dashboard Content -->
     <div class="dashboard-container">
-        <h1 class="text-center mb-4">Study Dashboard</h1>
+        <h1 class="text-center mb-5" style="font-weight: 700; letter-spacing: 1px; color: #60a5fa;">Study Dashboard</h1>
         <div class="row">
             <!-- Live Time and Day -->
             <div class="col-md-4 mb-4">
-                <div class="card">
+                <div class="card" data-tooltip="Shows the current time and day">
                     <div class="card-body text-center">
-                        <h5>Current Time & Day</h5>
+                        <h5><i class="fas fa-calendar-day me-2"></i>Current Time & Day</h5>
                         <p id="liveTime" class="timer"></p>
                         <p id="currentDay"></p>
                     </div>
@@ -92,59 +423,68 @@
             </div>
             <!-- Current Session -->
             <div class="col-md-4 mb-4">
-                <div class="card current-session">
+                <div class="card" data-tooltip="Displays your current study session">
                     <div class="card-body">
-                        <h5>Current Session</h5>
+                        <h5><i class="fas fa-book-open me-2"></i>Current Session</h5>
                         <p id="currentSession">No active session</p>
-                        <p id="countdownTimer" class="timer"></p>
                     </div>
                 </div>
             </div>
             <!-- Stopwatch -->
             <div class="col-md-4 mb-4">
-                <div class="card">
+                <div class="card" data-tooltip="Track your study time or start a 25-min Pomodoro session">
                     <div class="card-body text-center">
-                        <h5>Study Stopwatch</h5>
+                        <h5><i class="fas fa-stopwatch me-2"></i>Study Stopwatch</h5>
                         <p id="stopwatch" class="timer">00:00:00</p>
-                        <button class="btn btn-primary" onclick="startStopwatch()">Start</button>
-                        <button class="btn btn-warning" onclick="pauseStopwatch()">Pause</button>
-                        <button class="btn btn-danger" onclick="resetStopwatch()">Reset</button>
-                        <button class="btn pomodoro-btn mt-2" onclick="startPomodoro()">Start Pomodoro</button>
+                        <button class="btn btn-primary me-1" onclick="startStopwatch()"><i class="fas fa-play"></i> Start</button>
+                        <button class="btn btn-warning me-1" onclick="pauseStopwatch()"><i class="fas fa-pause"></i> Pause</button>
+                        <button class="btn btn-danger" onclick="resetStopwatch()"><i class="fas fa-stop"></i> Reset</button>
+                        <button class="btn pomodoro-btn mt-2" onclick="startPomodoro()"><i class="fas fa-hourglass-start"></i> Start Pomodoro</button>
                     </div>
                 </div>
             </div>
             <!-- Daily Study Total -->
             <div class="col-md-4 mb-4">
-                <div class="card">
+                <div class="card" data-tooltip="Total study time today">
                     <div class="card-body">
-                        <h5>Daily Study Total</h5>
+                        <h5><i class="fas fa-chart-line me-2"></i>Daily Study Total</h5>
                         <p id="dailyTotal">0 minutes</p>
                     </div>
                 </div>
             </div>
             <!-- Upcoming Session -->
             <div class="col-md-4 mb-4">
-                <div class="card upcoming-session">
+                <div class="card" data-tooltip="Next scheduled study session">
                     <div class="card-body">
-                        <h5>Upcoming Session</h5>
+                        <h5><i class="fas fa-forward me-2"></i>Upcoming Session</h5>
                         <p id="upcomingSession">No upcoming sessions today</p>
                     </div>
                 </div>
             </div>
             <!-- Today's Mission -->
             <div class="col-md-4 mb-4">
-                <div class="card mission-card">
+                <div class="card" data-tooltip="Your current mission from the Mission Board">
                     <div class="card-body">
-                        <h5>Today's Mission</h5>
+                        <h5><i class="fas fa-bullseye me-2"></i>Today's Mission</h5>
                         <p id="todayMission">No missions set (see Mission Board)</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Gamification -->
+            <div class="col-md-4 mb-4">
+                <div class="card" data-tooltip="Track your stars and level based on study time">
+                    <div class="card-body text-center">
+                        <h5><i class="fas fa-star me-2"></i>Gamification</h5>
+                        <p>Stars: <span id="starsEarned" class="star"></span></p>
+                        <p>Level: <span id="level"></span></p>
                     </div>
                 </div>
             </div>
             <!-- Motivational Quote -->
             <div class="col-12">
-                <div class="card quote-card">
+                <div class="card quote-card" data-tooltip="Daily inspiration to keep you motivated">
                     <div class="card-body text-center">
-                        <h5>Quote of the Day</h5>
+                        <h5><i class="fas fa-quote-left me-2"></i>Quote of the Day</h5>
                         <p id="motivationalQuote"></p>
                     </div>
                 </div>
@@ -168,6 +508,10 @@
             };
         }
 
+        function saveRoutine(routine) {
+            localStorage.setItem('studyRoutine', JSON.stringify(routine));
+        }
+
         function loadMissions() {
             return JSON.parse(localStorage.getItem('studyMissions')) || {
                 Sunday: [], Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [], Saturday: []
@@ -185,14 +529,22 @@
             localStorage.setItem('studyData', JSON.stringify(data));
         }
 
+        // Convert 24-hour time to 12-hour format
+        function sessionTimeTo12Hour(time) {
+            const [hours, minutes] = time.split(':').map(Number);
+            const period = hours >= 12 ? 'PM' : 'AM';
+            const adjustedHours = hours % 12 || 12;
+            return `${adjustedHours}:${minutes.toString().padStart(2, '0')} ${period}`;
+        }
+
         // Live Time and Day
         function updateLiveTime() {
             const now = new Date();
-            document.getElementById('liveTime').textContent = now.toLocaleTimeString();
+            document.getElementById('liveTime').textContent = now.toLocaleTimeString('en-US', { hour12: true });
             document.getElementById('currentDay').textContent = now.toLocaleDateString('en-US', { weekday: 'long' });
         }
 
-        // Current and Upcoming Sessions, Today's Mission
+        // Current and Upcoming Sessions, Today's Mission, Session Timer
         function updateSessions() {
             const now = new Date();
             const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' });
@@ -207,24 +559,33 @@
                 currentTime >= session.startTime && currentTime < session.endTime
             );
             document.getElementById('currentSession').textContent = currentSession
-                ? `${currentSession.startTime} - ${currentSession.endTime}: ${currentSession.subject}`
+                ? `${sessionTimeTo12Hour(currentSession.startTime)} - ${sessionTimeTo12Hour(currentSession.endTime)}: ${currentSession.subject}`
                 : 'No active session';
 
-            // Countdown Timer
+            // Session Timer
+            const timerElement = document.getElementById('sessionTimer');
+            const countdownElement = document.getElementById('countdownTimer');
             if (currentSession) {
                 const [hours, minutes] = currentSession.endTime.split(':').map(Number);
                 const endTime = new Date(now);
                 endTime.setHours(hours, minutes, 0, 0);
                 const timeLeft = endTime - now;
                 if (timeLeft > 0) {
+                    const totalMinutes = ((hours * 60 + minutes) - (now.getHours() * 60 + now.getMinutes()));
+                    const percentLeft = (timeLeft / (totalMinutes * 60 * 1000)) * 100;
                     const minutesLeft = Math.floor(timeLeft / 1000 / 60);
                     const secondsLeft = Math.floor((timeLeft / 1000) % 60);
-                    document.getElementById('countdownTimer').textContent = `${minutesLeft}m ${secondsLeft}s left`;
+                    countdownElement.textContent = `${minutesLeft}m ${secondsLeft}s left`;
+                    timerElement.className = `session-timer ${
+                        percentLeft > 50 ? 'green' : percentLeft > 20 ? 'yellow' : 'red'
+                    }`;
                 } else {
-                    document.getElementById('countdownTimer').textContent = '';
+                    countdownElement.textContent = 'Session ended';
+                    timerElement.className = 'session-timer green';
                 }
             } else {
-                document.getElementById('countdownTimer').textContent = '';
+                countdownElement.textContent = 'No active session';
+                timerElement.className = 'session-timer green';
             }
 
             // Upcoming Session
@@ -232,7 +593,7 @@
                 .filter(session => session.startTime > currentTime)
                 .sort((a, b) => a.startTime.localeCompare(b.startTime))[0];
             document.getElementById('upcomingSession').textContent = upcomingSession
-                ? `${upcomingSession.startTime} - ${upcomingSession.endTime}: ${upcomingSession.subject}`
+                ? `${sessionTimeTo12Hour(upcomingSession.startTime)} - ${sessionTimeTo12Hour(upcomingSession.endTime)}: ${upcomingSession.subject}`
                 : 'No upcoming sessions today';
 
             // Today's Mission
@@ -241,15 +602,23 @@
                 return currentTime >= startTime && currentTime < endTime && !mission.completed;
             });
             document.getElementById('todayMission').textContent = currentMission
-                ? `${currentMission.timeBlock}: ${currentMission.subject} - ${currentMission.task} (${currentMission.priority})`
+                ? `${sessionTimeTo12Hour(currentMission.timeBlock.split('-')[0])} - ${sessionTimeTo12Hour(currentMission.timeBlock.split('-')[1])}: ${currentMission.subject} - ${currentMission.task} (${currentMission.priority})`
                 : 'No active missions (see Mission Board)';
+
+            // Gamification
+            const studyData = loadStudyData();
+            const totalMinutes = Object.values(studyData.dailyTotals).reduce((sum, min) => sum + min, 0);
+            const stars = Math.floor(totalMinutes / 60); // 1 star per hour
+            const level = Math.floor(totalMinutes / (5 * 60)); // 1 level per 5 hours
+            document.getElementById('starsEarned').innerHTML = '★'.repeat(stars);
+            document.getElementById('level').textContent = level;
 
             // Missed Session Alert
             const missedSessions = todaySessions.filter(session =>
                 session.endTime < currentTime && !session.completed
             );
             if (missedSessions.length > 0) {
-                alert(`Missed sessions: ${missedSessions.map(s => `${s.startTime} ${s.subject}`).join(', ')}`);
+                alert(`Missed sessions: ${missedSessions.map(s => `${sessionTimeTo12Hour(s.startTime)} ${s.subject}`).join(', ')}`);
                 missedSessions.forEach(session => session.completed = true);
                 saveRoutine(routine);
             }
@@ -259,8 +628,8 @@
         let stopwatchInterval = null;
         let stopwatchSeconds = 0;
         let isPomodoro = false;
-        let pomodoroPhase = 'work'; // work or break
-        let pomodoroTimeLeft = 25 * 60; // 25 minutes default
+        let pomodoroPhase = 'work';
+        let pomodoroTimeLeft = 25 * 60;
 
         function updateStopwatch() {
             const hours = Math.floor(stopwatchSeconds / 3600);
@@ -280,11 +649,11 @@
                         if (pomodoroTimeLeft <= 0) {
                             if (pomodoroPhase === 'work') {
                                 pomodoroPhase = 'break';
-                                pomodoroTimeLeft = 5 * 60; // 5-minute break
+                                pomodoroTimeLeft = 5 * 60;
                                 alert('Work session complete! Take a 5-minute break.');
                             } else {
                                 pomodoroPhase = 'work';
-                                pomodoroTimeLeft = 25 * 60; // 25-minute work
+                                pomodoroTimeLeft = 25 * 60;
                                 const studyData = loadStudyData();
                                 studyData.pomodoroSessions = (studyData.pomodoroSessions || 0) + 1;
                                 saveStudyData(studyData);
@@ -345,6 +714,94 @@
             document.getElementById('motivationalQuote').textContent = quotes[quoteIndex];
         }
 
+        // Chatbot
+        const chatbotResponses = {
+            'stopwatch': 'The stopwatch tracks your study time. Click "Start" to begin, "Pause" to stop, or "Reset" to clear. Use "Start Pomodoro" for a 25-minute focused session with a 5-minute break!',
+            'pomodoro': 'Pomodoro mode runs a 25-minute work session followed by a 5-minute break. It’s great for focus! Start it from the stopwatch card.',
+            'missions': 'Check the Mission Board to set daily tasks. The "Today’s Mission" card shows your current task. Complete missions to boost your progress!',
+            'notes': 'Use the Exam Recap page to create quick notes and study with flashcards or slides. Perfect for last-minute reviews!',
+            'stars': 'You earn 1 star for every hour of study time tracked via the stopwatch or Pomodoro. Check your stars and level in the Gamification card!',
+            'level': 'You gain 1 level for every 5 hours of study time. Keep studying to level up and track your progress!',
+            'routine': 'The Routine page lets you schedule study sessions. They appear here as Current or Upcoming Sessions.',
+            'progress': 'The Progress page shows your study stats with charts and reports. Track your daily and monthly goals there!',
+            'hi': 'Hello! Welcome to StudyBuddy. I’m here to guide you. Try the suggestions below or ask me anything!'
+        };
+
+        function toggleChatbot() {
+            const panel = document.getElementById('chatbotPanel');
+            const toggle = document.getElementById('chatbotToggle');
+            panel.classList.toggle('open');
+            toggle.classList.toggle('open');
+            if (panel.classList.contains('open')) {
+                document.getElementById('chatbotInput').focus();
+            }
+        }
+
+        function closeChatbot() {
+            const panel = document.getElementById('chatbotPanel');
+            const toggle = document.getElementById('chatbotToggle');
+            panel.classList.remove('open');
+            toggle.classList.remove('open');
+        }
+
+        function clearChat() {
+            const messages = document.getElementById('chatbotMessages');
+            messages.innerHTML = `
+                <div class="chatbot-message">
+                    Welcome to StudyBuddy! I'm here to help. Earn <b>1 star per study hour</b> and <b>1 level per 5 hours</b>. Try the suggestions below or ask me anything!
+                </div>
+            `;
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function addChatMessage(message, isUser = false) {
+            const messages = document.getElementById('chatbotMessages');
+            const div = document.createElement('div');
+            div.className = `chatbot-message ${isUser ? 'user' : ''}`;
+            div.textContent = message;
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function sendSuggestion(query) {
+            const input = document.getElementById('chatbotInput');
+            input.value = query;
+            const event = new Event('submit');
+            document.getElementById('chatbotForm').dispatchEvent(event);
+        }
+
+        document.getElementById('chatbotForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const input = document.getElementById('chatbotInput');
+            const query = input.value.trim().toLowerCase();
+            if (!query) return;
+
+            addChatMessage(query, true);
+            const response = chatbotResponses[query] || 'Sorry, I didn’t understand that. Try the suggestions below or ask about "stopwatch", "missions", or "stars"!';
+            setTimeout(() => addChatMessage(response), 500); // Simulate typing delay
+            input.value = '';
+        });
+
+        // Click Outside to Close
+        document.addEventListener('click', (e) => {
+            const panel = document.getElementById('chatbotPanel');
+            const toggle = document.getElementById('chatbotToggle');
+            if (panel.classList.contains('open') && !panel.contains(e.target) && !toggle.contains(e.target)) {
+                closeChatbot();
+            }
+        });
+
+        // Tooltips for Guidance
+        document.querySelectorAll('[data-tooltip]').forEach(element => {
+            element.addEventListener('mouseenter', () => {
+                if (!document.getElementById('chatbotPanel').classList.contains('open')) {
+                    addChatMessage(element.dataset.tooltip);
+                    document.getElementById('chatbotPanel').classList.add('open');
+                    document.getElementById('chatbotToggle').classList.add('open');
+                }
+            });
+        });
+
         // Initialize
         function initialize() {
             updateLiveTime();
@@ -354,7 +811,7 @@
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('dailyTotal').textContent = `${studyData.dailyTotals[today] || 0} minutes`;
             setInterval(updateLiveTime, 1000);
-            setInterval(updateSessions, 60000); // Update sessions and missions every minute
+            setInterval(updateSessions, 1000); // Update every second for timer
         }
 
         initialize();

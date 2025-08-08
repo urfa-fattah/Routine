@@ -6,138 +6,398 @@
     <title>StudyBuddy - Exam Recap</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
         body {
-            font-family: 'Arial', sans-serif;
-            padding-bottom: 60px; /* Space for fixed footer */
-            transition: background-color 0.3s, color 0.3s;
-        }
-        body.light-theme {
-            background-color: #f8f9fa;
-            color: #333;
-        }
-        body.dark-theme {
-            background-color: #1a1a1a;
-            color: #f8f9fa;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #2a0645, #6b21a8);
+            color: #e2e8f0;
+            padding-bottom: 50px;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
         .navbar {
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        .navbar.dark-theme {
-            background-color: #2c2c2c !important;
-        }
-        .recap-container {
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 20px;
-        }
-        .note-card {
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s, box-shadow 0.3s, opacity 0.5s;
-            background-color: #fff;
-            margin-bottom: 20px;
-            opacity: 0;
-            animation: fadeIn 0.5s forwards;
-        }
-        .note-card.dark-theme {
-            background-color: #2c2c2c;
-            box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
-        }
-        .note-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-        .note-card.pinned {
-            border-left: 4px solid #007bff;
-            background-color: #e7f1ff;
-        }
-        .note-card.pinned.dark-theme {
-            background-color: #1e3a8a;
-        }
-        .note-image {
-            max-width: 100%;
-            max-height: 150px;
-            object-fit: cover;
-            border-radius: 4px;
-            margin-top: 10px;
-        }
-        .tag {
-            display: inline-block;
-            background-color: #6c757d;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            margin: 2px;
-        }
-        .tag.dark-theme {
-            background-color: #495057;
-        }
-        .study-mode-container {
-            display: none;
+            background: rgba(30, 10, 60, 0.4) !important;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0 0 12px 12px;
             position: fixed;
             top: 0;
-            left: 0;
             width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.9);
             z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
         }
-        .study-card {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            max-width: 600px;
-            width: 100%;
-            text-align: center;
+        .navbar-brand, .nav-link {
+            color: #e2e8f0 !important;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            transition: color 0.3s, transform 0.3s;
+        }
+        .nav-link:hover {
+            color: #60a5fa !important;
+            transform: scale(1.05);
+        }
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%2360a5fa' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+        .container {
+            max-width: 1200px;
+            margin: 90px auto 30px;
+            padding: 30px;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+        }
+        .card h5 {
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            color: #60a5fa;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        .timer {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #facc15;
+        }
+        .session-timer {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 10px 20px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            z-index: 1001;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .session-timer:hover {
+            transform: scale(1.05);
+        }
+        .session-timer.green { background: rgba(34, 197, 94, 0.3); }
+        .session-timer.yellow { background: rgba(234, 179, 8, 0.3); }
+        .session-timer.red { background: rgba(239, 68, 68, 0.3); }
+        .chatbot-panel {
+            position: fixed;
+            top: 70px;
+            right: -300px;
+            width: 300px;
+            height: calc(100vh - 130px);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px 0 0 12px;
+            box-shadow: -4px 0 16px rgba(0, 0, 0, 0.3);
+            z-index: 998;
+            transition: right 0.3s ease-in-out;
+            display: flex;
+            flex-direction: column;
+        }
+        .chatbot-panel.open {
+            right: 0;
+        }
+        .chatbot-header {
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 12px 0 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .chatbot-header h5 {
+            margin: 0;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            color: #60a5fa;
+        }
+        .chatbot-header .close-btn, .chatbot-header .clear-btn {
+            background: transparent;
+            border: none;
+            color: #e2e8f0;
+            font-size: 1.3rem;
+            transition: color 0.3s, transform 0.3s;
+        }
+        .chatbot-header .close-btn:hover, .chatbot-header .clear-btn:hover {
+            color: #ef4444;
+            transform: scale(1.1);
+        }
+        .chatbot-body {
+            flex: 1;
+            padding: 12px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .chatbot-message {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 10px 14px;
+            border-radius: 10px;
+            max-width: 80%;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.5s ease;
+        }
+        .chatbot-message.user {
+            background: rgba(167, 139, 250, 0.3);
+            align-self: flex-end;
+        }
+        .chatbot-suggestions {
+            padding: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .chatbot-suggestion {
+            background: linear-gradient(45deg, #a78bfa, #7c3aed);
+            border: none;
+            border-radius: 16px;
+            padding: 6px 12px;
+            color: #fff;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: transform 0.3s, background 0.3s;
+            animation: slideIn 0.5s ease;
+        }
+        .chatbot-suggestion:hover {
+            transform: scale(1.05);
+            background: linear-gradient(45deg, #7c3aed, #a78bfa);
+        }
+        .chatbot-footer {
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.15);
+        }
+        .chatbot-footer input {
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #e2e8f0;
+        }
+        .chatbot-footer input::placeholder {
+            color: #94a3b8;
+        }
+        .chatbot-footer .btn {
+            background: linear-gradient(45deg, #a78bfa, #7c3aed);
+            border: none;
+            border-radius: 20px;
             transition: transform 0.3s;
         }
-        .study-card.dark-theme {
-            background-color: #2c2c2c;
-            color: #f8f9fa;
+        .chatbot-footer .btn:hover {
+            transform: scale(1.05);
+            background: linear-gradient(45deg, #7c3aed, #a78bfa);
+        }
+        .chatbot-toggle {
+            position: fixed;
+            bottom: 70px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1001;
+            animation: pulse 1.5s infinite;
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        .chatbot-toggle:hover {
+            transform: scale(1.1);
+        }
+        .chatbot-toggle.open {
+            opacity: 0.7;
+        }
+        .chatbot-toggle i {
+            font-size: 1.5rem;
+            color: #e2e8f0;
+        }
+        .btn-primary, .btn-danger {
+            border-radius: 8px;
+            transition: transform 0.3s, background 0.3s;
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #a78bfa, #7c3aed);
+            border: none;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(45deg, #7c3aed, #a78bfa);
+            transform: scale(1.05);
+        }
+        .btn-danger {
+            background: linear-gradient(45deg, #ef4444, #f87171);
+            border: none;
+        }
+        .btn-danger:hover {
+            background: linear-gradient(45deg, #dc2626, #ef4444);
+            transform: scale(1.05);
         }
         footer {
-            background-color: #343a40;
-            color: white;
+            background: rgba(30, 10, 60, 0.7);
+            backdrop-filter: blur(12px);
+            color: #e2e8f0;
             text-align: center;
-            padding: 10px 0;
+            padding: 8px 0;
             position: fixed;
             bottom: 0;
             width: 100%;
+            z-index: 1000;
         }
-        footer.dark-theme {
-            background-color: #1a1a1a;
+        .form-control, .form-select {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #e2e8f0;
+            border-radius: 8px;
         }
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 2000;
+        .form-control::placeholder {
+            color: #94a3b8;
+        }
+        .table {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .table th, .table td {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e2e8f0;
+            vertical-align: middle;
+        }
+        .table th {
+            background: rgba(167, 139, 250, 0.2);
+            color: #60a5fa;
+            font-weight: 600;
+        }
+        .table tbody tr {
+            animation: fadeIn 0.5s ease;
+            transition: background 0.3s;
+        }
+        .table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .pass {
+            color: #22c55e;
+            font-weight: 600;
+        }
+        .fail {
+            color: #ef4444;
+            font-weight: 600;
+        }
+        .exam-image {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .modal-content img {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        .chart-container {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
         @media (max-width: 768px) {
-            .recap-container {
-                padding: 10px;
+            .container {
+                margin-top: 100px;
+                padding: 15px;
             }
-            .note-card {
+            .timer {
+                font-size: 1.3rem;
+            }
+            .session-timer {
+                top: 60px;
+                right: 10px;
+                padding: 8px 15px;
                 font-size: 0.9rem;
             }
-            .study-card {
-                padding: 10px;
+            .chatbot-panel {
+                width: 250px;
+                right: -250px;
+                height: calc(100vh - 120px);
+            }
+            .chatbot-panel.open {
+                right: 0;
+            }
+            .chatbot-toggle {
+                bottom: 60px;
+                right: 10px;
+                width: 40px;
+                height: 40px;
+            }
+            .chatbot-toggle i {
+                font-size: 1.2rem;
+            }
+            .chatbot-suggestion {
+                font-size: 0.75rem;
+                padding: 5px 10px;
+            }
+            .chatbot-header h5 {
+                font-size: 1rem;
+            }
+            .chatbot-message {
+                font-size: 0.85rem;
+            }
+            .card h5 {
+                font-size: 1.1rem;
+            }
+            .table {
+                font-size: 0.9rem;
+            }
+            .table th, .table td {
+                padding: 8px;
+            }
+            .exam-image {
+                width: 30px;
+                height: 30px;
+            }
+            .chart-container {
+                padding: 15px;
             }
         }
     </style>
 </head>
-<body class="light-theme">
+<body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container-fluid">
             <a class="navbar-brand" href="index.html">StudyBuddy</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -150,110 +410,170 @@
                     <li class="nav-item"><a class="nav-link" href="mission.html">Mission Board</a></li>
                     <li class="nav-item"><a class="nav-link active" href="exam-recap.html">Exam Recap</a></li>
                     <li class="nav-item"><a class="nav-link" href="progress.html">Progress</a></li>
-                    <li class="nav-item"><button class="btn btn-outline-secondary ms-2" onclick="toggleTheme()">Toggle Dark Mode</button></li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <!-- Exam Recap Content -->
-    <div class="recap-container">
-        <h1 class="text-center mb-4">Exam Recap</h1>
-        <div class="mb-4 d-flex justify-content-between flex-wrap gap-2">
-            <div class="d-flex flex-wrap gap-2">
-                <input type="text" id="searchInput" class="form-control" style="max-width: 200px;" placeholder="Search notes or tags">
-                <select id="subjectFilter" class="form-select" style="max-width: 200px;">
-                    <option value="">All Subjects</option>
-                    <!-- Populated dynamically -->
-                </select>
-                <select id="tagFilter" class="form-select" style="max-width: 200px;">
-                    <option value="">All Tags</option>
-                    <!-- Populated dynamically -->
-                </select>
-                <select id="sortSelect" class="form-select" style="max-width: 200px;">
-                    <option value="pinned">Pinned First</option>
-                    <option value="date-desc">Newest First</option>
-                    <option value="date-asc">Oldest First</option>
-                    <option value="subject">Subject</option>
-                </select>
-            </div>
-            <div class="d-flex gap-2">
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addNoteModal">Add Note</button>
-                <button class="btn btn-success" onclick="startStudyMode('flashcard')">Flashcard Mode</button>
-                <button class="btn btn-success" onclick="startStudyMode('slide')">Slide Mode</button>
-                <button class="btn btn-info" onclick="document.getElementById('importInput').click()">Import</button>
-                <button class="btn btn-info" onclick="exportNotes()">Export</button>
-                <input type="file" id="importInput" accept=".json" style="display: none;">
+    <!-- Session Timer -->
+    <div id="sessionTimer" class="session-timer green">
+        <i class="fas fa-clock me-2"></i>
+        <span id="countdownTimer">No active session</span>
+    </div>
+
+    <!-- Chatbot Toggle -->
+    <div class="chatbot-toggle" id="chatbotToggle" onclick="toggleChatbot()">
+        <i class="fas fa-robot"></i>
+    </div>
+
+    <!-- Chatbot Panel -->
+    <div class="chatbot-panel" id="chatbotPanel">
+        <div class="chatbot-header">
+            <h5>StudyBuddy Assistant</h5>
+            <div>
+                <button class="clear-btn" onclick="clearChat()"><i class="fas fa-trash"></i></button>
+                <button class="close-btn" onclick="closeChatbot()"><i class="fas fa-times"></i></button>
             </div>
         </div>
-
-        <!-- Notes Display -->
-        <div id="notesDisplay" class="row"></div>
-
-        <!-- Study Mode Container -->
-        <div id="studyModeContainer" class="study-mode-container">
-            <div class="study-card">
-                <h5 id="studySubject"></h5>
-                <p id="studyNote"></p>
-                <img id="studyImage" class="note-image d-none">
-                <p id="studyTags"></p>
-                <button class="btn btn-primary" id="prevNote">Previous</button>
-                <button class="btn btn-primary ms-2" id="nextNote">Next</button>
-                <button class="btn btn-danger ms-2" onclick="exitStudyMode()">Exit</button>
+        <div class="chatbot-body" id="chatbotMessages">
+            <div class="chatbot-message">
+                Welcome to StudyBuddy! I'm here to help. Earn <b>1 star per study hour</b> and <b>1 level per 5 hours</b>. Try the suggestions below or ask me anything!
             </div>
         </div>
+        <div class="chatbot-suggestions">
+            <button class="chatbot-suggestion" onclick="sendSuggestion('exam recap')">How do I use Exam Recap?</button>
+            <button class="chatbot-suggestion" onclick="sendSuggestion('add exam')">How do I add an exam?</button>
+            <button class="chatbot-suggestion" onclick="sendSuggestion('image upload')">How do I upload an image?</button>
+            <button class="chatbot-suggestion" onclick="sendSuggestion('pass fail')">What do Pass/Fail mean?</button>
+            <button class="chatbot-suggestion" onclick="sendSuggestion('progress')">How does this link to Progress?</button>
+        </div>
+        <div class="chatbot-footer">
+            <form id="chatbotForm">
+                <div class="input-group">
+                    <input type="text" id="chatbotInput" class="form-control" placeholder="Ask me something..." autocomplete="off">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-        <!-- Add/Edit Note Modal -->
-        <div class="modal fade" id="addNoteModal" tabindex="-1" aria-labelledby="addNoteModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="addNoteModalLabel">Add Note</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="addNoteForm">
+    <!-- Main Content -->
+    <div class="container">
+        <h1 class="text-center mb-5" style="font-weight: 700; letter-spacing: 1px; color: #60a5fa;">Exam Recap</h1>
+        <div class="row">
+            <!-- Add Exam Form -->
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5><i class="fas fa-file-alt me-2"></i>Add Exam Recap</h5>
+                        <form id="addExamForm">
                             <div class="mb-3">
-                                <label for="subjectSelect" class="form-label">Subject</label>
-                                <select id="subjectSelect" class="form-select" required>
-                                    <option value="Biology">Biology</option>
-                                    <option value="Math">Math</option>
-                                    <option value="Physics">Physics</option>
-                                    <option value="Chemistry">Chemistry</option>
-                                    <option value="Other">Other</option>
-                                </select>
+                                <label for="examDate" class="form-label">Date</label>
+                                <input type="date" id="examDate" class="form-control" required data-bs-toggle="tooltip" title="Select the exam date">
                             </div>
                             <div class="mb-3">
-                                <label for="noteInput" class="form-label">Note (max 500 characters)</label>
-                                <textarea id="noteInput" class="form-control" required rows="4" maxlength="500" placeholder="Enter key points for quick review"></textarea>
-                                <div class="form-text">Characters remaining: <span id="charCount">500</span></div>
-                            </div>
-                            <div class="mb-3 position-relative">
-                                <label for="tagsInput" class="form-label">Tags (comma-separated)</label>
-                                <input type="text" id="tagsInput" class="form-control" placeholder="e.g., formulas, key terms" autocomplete="off">
-                                <ul id="tagSuggestions" class="list-group position-absolute w-100" style="z-index: 1000; max-height: 150px; overflow-y: auto; display: none;"></ul>
+                                <label for="subject" class="form-label">Subject</label>
+                                <input type="text" id="subject" class="form-control" placeholder="e.g., Math" required data-bs-toggle="tooltip" title="Enter the subject, e.g., Math or History">
                             </div>
                             <div class="mb-3">
-                                <label for="imageInput" class="form-label">Image (optional)</label>
-                                <input type="file" id="imageInput" class="form-control" accept="image/*">
-                                <img id="imagePreview" class="note-image d-none mt-2">
+                                <label for="score" class="form-label">Score</label>
+                                <input type="number" id="score" class="form-control" min="0" max="100" placeholder="e.g., 85" required data-bs-toggle="tooltip" title="Enter score out of 100">
                             </div>
-                            <input type="hidden" id="editIndex" value="-1">
-                            <button type="submit" class="btn btn-success">Save Note</button>
+                            <div class="mb-3">
+                                <label for="notes" class="form-label">Notes</label>
+                                <textarea id="notes" class="form-control" rows="4" placeholder="e.g., Focused on algebra" data-bs-toggle="tooltip" title="Add notes about the exam"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="image" class="form-label">Image (Optional)</label>
+                                <input type="file" id="image" class="form-control" accept="image/*" data-bs-toggle="tooltip" title="Upload an exam image (max 5MB)">
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Add Exam</button>
                         </form>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Toast Container -->
-        <div class="toast-container">
-            <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header">
-                    <strong class="me-auto">Success</strong>
-                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            <!-- Exam List -->
+            <div class="col-md-8 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5><i class="fas fa-list-ul me-2"></i>Past Exams</h5>
+                        <div class="d-flex mb-3 flex-wrap gap-2">
+                            <select id="sortExams" class="form-select me-2" style="width: auto;">
+                                <option value="date-desc">Sort by Date (Newest First)</option>
+                                <option value="score-desc">Sort by Score (Highest First)</option>
+                            </select>
+                            <select id="filterSubject" class="form-select me-2" style="width: auto;">
+                                <option value="">Filter by Subject (All)</option>
+                            </select>
+                            <button class="btn btn-primary" onclick="updateExams()">Apply</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Subject</th>
+                                        <th>Score</th>
+                                        <th>Status</th>
+                                        <th>Image</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="examList"></tbody>
+                            </table>
+                        </div>
+                        <div class="chart-container">
+                            <h5><i class="fas fa-chart-line me-2"></i>Score Trend</h5>
+                            <select id="chartSubject" class="form-select mb-3" style="width: auto;">
+                                <option value="">All Subjects</option>
+                            </select>
+                            <canvas id="scoreChart"></canvas>
+                        </div>
+                    </div>
                 </div>
-                <div class="toast-body"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Exam Modal -->
+    <div class="modal fade" id="viewModal" tabindex="-1" aria-labelledby="viewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.2);">
+                <div class="modal-header" style="border-bottom: 1px solid rgba(255, 255, 255, 0.2);">
+                    <h5 class="modal-title" id="viewModalLabel" style="color: #60a5fa;">Exam Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                </div>
+                <div class="modal-body" style="color: #e2e8f0;">
+                    <p><strong>Date:</strong> <span id="viewDate"></span></p>
+                    <p><strong>Subject:</strong> <span id="viewSubject"></span></p>
+                    <p><strong>Score:</strong> <span id="viewScore"></span></p>
+                    <p><strong>Status:</strong> <span id="viewStatus"></span></p>
+                    <p><strong>Notes:</strong> <span id="viewNotes"></span></p>
+                    <p><strong>Image:</strong></p>
+                    <div id="viewImage"></div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid rgba(255, 255, 255, 0.2);">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.2);">
+                <div class="modal-header" style="border-bottom: 1px solid rgba(255, 255, 255, 0.2);">
+                    <h5 class="modal-title" id="deleteModalLabel" style="color: #60a5fa;">Confirm Deletion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                </div>
+                <div class="modal-body" style="color: #e2e8f0;">
+                    Are you sure you want to delete this exam recap?
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid rgba(255, 255, 255, 0.2);">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
+                </div>
             </div>
         </div>
     </div>
@@ -267,405 +587,418 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
     <script>
-        // Theme Management
-        function setTheme(theme) {
-            document.body.className = theme + '-theme';
-            document.querySelector('nav').classList.toggle('dark-theme', theme === 'dark');
-            document.querySelector('footer').classList.toggle('dark-theme', theme === 'dark');
-            document.querySelectorAll('.note-card').forEach(card => card.classList.toggle('dark-theme', theme === 'dark'));
-            document.querySelectorAll('.tag').forEach(tag => tag.classList.toggle('dark-theme', theme === 'dark'));
-            document.querySelector('.study-card').classList.toggle('dark-theme', theme === 'dark');
-            localStorage.setItem('theme', theme);
-        }
-
-        function toggleTheme() {
-            const currentTheme = localStorage.getItem('theme') || 'light';
-            setTheme(currentTheme === 'light' ? 'dark' : 'light');
-        }
-
         // LocalStorage Management
-        function loadNotes() {
-            return JSON.parse(localStorage.getItem('examNotes')) || [];
+        function loadExams() {
+            return JSON.parse(localStorage.getItem('examRecaps')) || [];
         }
 
-        function saveNotes(notes) {
-            localStorage.setItem('examNotes', JSON.stringify(notes));
+        function saveExams(exams) {
+            localStorage.setItem('examRecaps', JSON.stringify(exams));
+        }
+
+        function loadRoutine() {
+            return JSON.parse(localStorage.getItem('studyRoutine')) || {
+                Sunday: [], Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [], Saturday: []
+            };
+        }
+
+        // Format Date to MM/DD/YYYY
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}/${date.getFullYear()}`;
         }
 
         // Compress Image
-        async function compressImage(file, maxSizeKB = 100) {
-            return new Promise((resolve) => {
+        async function compressImage(file) {
+            return new Promise((resolve, reject) => {
+                if (!file) return resolve(null);
+                if (file.size > 5 * 1024 * 1024) {
+                    return reject('Image size must be less than 5MB.');
+                }
+                const img = new Image();
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    const img = new Image();
                     img.src = e.target.result;
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
                         const ctx = canvas.getContext('2d');
+                        const maxWidth = 800;
+                        const maxHeight = 800;
                         let width = img.width;
                         let height = img.height;
-                        const maxDimension = 800;
-                        if (width > height && width > maxDimension) {
-                            height *= maxDimension / width;
-                            width = maxDimension;
-                        } else if (height > maxDimension) {
-                            width *= maxDimension / height;
-                            height = maxDimension;
+                        if (width > height) {
+                            if (width > maxWidth) {
+                                height *= maxWidth / width;
+                                width = maxWidth;
+                            }
+                        } else {
+                            if (height > maxHeight) {
+                                width *= maxHeight / height;
+                                height = maxHeight;
+                            }
                         }
                         canvas.width = width;
                         canvas.height = height;
                         ctx.drawImage(img, 0, 0, width, height);
-                        canvas.toBlob(
-                            (blob) => {
-                                resolve(URL.createObjectURL(blob));
-                            },
-                            'image/jpeg',
-                            0.7
-                        );
+                        canvas.toBlob((blob) => {
+                            const compressedReader = new FileReader();
+                            compressedReader.onload = () => resolve(compressedReader.result);
+                            compressedReader.onerror = reject;
+                            compressedReader.readAsDataURL(blob);
+                        }, 'image/jpeg', 0.7); // 70% quality
                     };
+                    img.onerror = reject;
                 };
+                reader.onerror = reject;
                 reader.readAsDataURL(file);
             });
         }
 
-        // Display Notes
-        function displayNotes(filterSubject = '', filterTag = '', searchQuery = '', sortBy = 'pinned') {
-            const notes = loadNotes();
-            const notesDisplay = document.getElementById('notesDisplay');
-            notesDisplay.innerHTML = '';
+        // Session Timer
+        function updateSessionTimer() {
+            const now = new Date();
+            const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' });
+            const currentTime = now.toTimeString().slice(0, 5); // HH:MM
+            const routine = loadRoutine();
+            const todaySessions = routine[currentDay] || [];
 
-            // Filter and Search
-            let filteredNotes = notes
-                .filter(note => filterSubject ? note.subject === filterSubject : true)
-                .filter(note => filterTag ? note.tags.includes(filterTag) : true)
-                .filter(note => searchQuery ?
-                    note.note.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    note.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())) : true);
+            const timerElement = document.getElementById('sessionTimer');
+            const countdownElement = document.getElementById('countdownTimer');
+            const currentSession = todaySessions.find(session =>
+                currentTime >= session.startTime && currentTime < session.endTime
+            );
 
-            // Sort
-            if (sortBy === 'pinned') {
-                filteredNotes.sort((a, b) => b.pinned - a.pinned || b.createdAt - a.createdAt);
-            } else if (sortBy === 'date-desc') {
-                filteredNotes.sort((a, b) => b.createdAt - a.createdAt);
-            } else if (sortBy === 'date-asc') {
-                filteredNotes.sort((a, b) => a.createdAt - b.createdAt);
-            } else if (sortBy === 'subject') {
-                filteredNotes.sort((a, b) => a.subject.localeCompare(b.subject));
-            }
-
-            filteredNotes.forEach((note, index) => {
-                const noteCard = document.createElement('div');
-                noteCard.className = `col-md-4 col-sm-6 note-card ${note.pinned ? 'pinned' : ''} ${localStorage.getItem('theme') === 'dark' ? 'dark-theme' : ''}`;
-                noteCard.innerHTML = `
-                    <div class="card">
-                        <div class="card-body">
-                            <h5>${note.subject}</h5>
-                            <p>${note.note}</p>
-                            ${note.image ? `<img src="${note.image}" class="note-image">` : ''}
-                            <div>${note.tags.map(tag => `<span class="tag ${localStorage.getItem('theme') === 'dark' ? 'dark-theme' : ''}">${tag}</span>`).join('')}</div>
-                            <button class="btn btn-sm btn-primary mt-2" onclick="togglePin(${index})">${note.pinned ? 'Unpin' : 'Pin'}</button>
-                            <button class="btn btn-sm btn-warning mt-2 ms-2" onclick="editNote(${index})">Edit</button>
-                            <button class="btn btn-sm btn-danger mt-2 ms-2" onclick="deleteNote(${index})">Delete</button>
-                        </div>
-                    </div>
-                `;
-                notesDisplay.appendChild(noteCard);
-            });
-
-            // Update Tag Filter
-            const allTags = [...new Set(notes.flatMap(note => note.tags))];
-            const tagFilter = document.getElementById('tagFilter');
-            tagFilter.innerHTML = '<option value="">All Tags</option>';
-            allTags.forEach(tag => {
-                const option = document.createElement('option');
-                option.value = tag;
-                option.textContent = tag;
-                tagFilter.appendChild(option);
-            });
-        }
-
-        // Add/Edit Note
-        document.getElementById('addNoteForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const subject = document.getElementById('subjectSelect').value;
-            const note = document.getElementById('noteInput').value;
-            const tags = document.getElementById('tagsInput').value.split(',').map(t => t.trim()).filter(t => t);
-            const imageInput = document.getElementById('imageInput').files[0];
-            const editIndex = parseInt(document.getElementById('editIndex').value);
-            let image = null;
-
-            if (imageInput) {
-                image = await compressImage(imageInput);
-            }
-
-            const notes = loadNotes();
-            const noteData = {
-                subject,
-                note,
-                tags,
-                image,
-                pinned: editIndex >= 0 ? notes[editIndex].pinned : false,
-                createdAt: editIndex >= 0 ? notes[editIndex].createdAt : Date.now()
-            };
-
-            if (editIndex >= 0) {
-                notes[editIndex] = noteData;
-                showToast('Note updated successfully!');
+            if (currentSession) {
+                const [hours, minutes] = currentSession.endTime.split(':').map(Number);
+                const endTime = new Date(now);
+                endTime.setHours(hours, minutes, 0, 0);
+                const timeLeft = endTime - now;
+                if (timeLeft > 0) {
+                    const totalMinutes = ((hours * 60 + minutes) - (now.getHours() * 60 + now.getMinutes()));
+                    const percentLeft = (timeLeft / (totalMinutes * 60 * 1000)) * 100;
+                    const minutesLeft = Math.floor(timeLeft / 1000 / 60);
+                    const secondsLeft = Math.floor((timeLeft / 1000) % 60);
+                    countdownElement.textContent = `${minutesLeft}m ${secondsLeft}s left`;
+                    timerElement.className = `session-timer ${
+                        percentLeft > 50 ? 'green' : percentLeft > 20 ? 'yellow' : 'red'
+                    }`;
+                } else {
+                    countdownElement.textContent = 'Session ended';
+                    timerElement.className = 'session-timer green';
+                }
             } else {
-                notes.push(noteData);
-                showToast('Note added successfully!');
-            }
-
-            saveNotes(notes);
-            displayNotes();
-            bootstrap.Modal.getInstance(document.getElementById('addNoteModal')).hide();
-            e.target.reset();
-            document.getElementById('editIndex').value = '-1';
-            document.getElementById('imagePreview').classList.add('d-none');
-        });
-
-        // Toggle Pin
-        function togglePin(index) {
-            const notes = loadNotes();
-            notes[index].pinned = !notes[index].pinned;
-            saveNotes(notes);
-            displayNotes();
-            showToast(notes[index].pinned ? 'Note pinned!' : 'Note unpinned!');
-        }
-
-        // Edit Note
-        function editNote(index) {
-            const notes = loadNotes();
-            const note = notes[index];
-            document.getElementById('subjectSelect').value = note.subject;
-            document.getElementById('noteInput').value = note.note;
-            document.getElementById('tagsInput').value = note.tags.join(', ');
-            document.getElementById('editIndex').value = index;
-            document.getElementById('imagePreview').classList.toggle('d-none', !note.image);
-            if (note.image) document.getElementById('imagePreview').src = note.image;
-            document.getElementById('addNoteModalLabel').textContent = 'Edit Note';
-            bootstrap.Modal.getOrCreateInstance(document.getElementById('addNoteModal')).show();
-        }
-
-        // Delete Note
-        function deleteNote(index) {
-            if (confirm('Delete this note?')) {
-                const notes = loadNotes();
-                notes.splice(index, 1);
-                saveNotes(notes);
-                displayNotes();
-                showToast('Note deleted successfully!');
+                countdownElement.textContent = 'No active session';
+                timerElement.className = 'session-timer green';
             }
         }
 
-        // Study Mode
-        let studyNotes = [];
-        let currentStudyIndex = 0;
-        let studyModeType = '';
+        // Update Subject Filter
+        function updateSubjectFilter() {
+            const exams = loadExams();
+            const subjects = [...new Set(exams.map(exam => exam.subject))];
+            const filterSelect = document.getElementById('filterSubject');
+            filterSelect.innerHTML = '<option value="">Filter by Subject (All)</option>';
+            subjects.forEach(subject => {
+                const option = document.createElement('option');
+                option.value = subject;
+                option.textContent = subject;
+                filterSelect.appendChild(option);
+            });
+            const chartSelect = document.getElementById('chartSubject');
+            chartSelect.innerHTML = '<option value="">All Subjects</option>';
+            subjects.forEach(subject => {
+                const option = document.createElement('option');
+                option.value = subject;
+                option.textContent = subject;
+                chartSelect.appendChild(option);
+            });
+        }
 
-        function startStudyMode(mode) {
-            studyModeType = mode;
-            const notes = loadNotes();
-            studyNotes = notes.sort((a, b) => b.pinned - a.pinned || b.createdAt - a.createdAt);
-            if (studyNotes.length === 0) {
-                showToast('No notes available for study mode.', 'danger');
+        // Update Exam List
+        function updateExams() {
+            const exams = loadExams();
+            const sortOption = document.getElementById('sortExams').value;
+            const filterSubject = document.getElementById('filterSubject').value;
+            const examList = document.getElementById('examList');
+
+            // Filter and sort
+            let filteredExams = filterSubject ? exams.filter(exam => exam.subject === filterSubject) : exams;
+            if (sortOption === 'date-desc') {
+                filteredExams.sort((a, b) => new Date(b.date) - new Date(a.date));
+            } else if (sortOption === 'score-desc') {
+                filteredExams.sort((a, b) => b.score - a.score);
+            }
+
+            examList.innerHTML = '';
+            filteredExams.forEach((exam, index) => {
+                const status = exam.score >= 60 ? 'Pass' : 'Fail';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${formatDate(exam.date)}</td>
+                    <td>${exam.subject}</td>
+                    <td>${exam.score}</td>
+                    <td class="${status.toLowerCase()}">${status}</td>
+                    <td>${exam.image ? `<img src="${exam.image}" class="exam-image" alt="Exam Image" data-bs-toggle="tooltip" title="View image" onclick="viewExam(${index})">` : 'None'}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm me-1" onclick="viewExam(${index})" data-bs-toggle="tooltip" title="View details"><i class="fas fa-eye"></i></button>
+                        <button class="btn btn-primary btn-sm me-1" onclick="editExam(${index})" data-bs-toggle="tooltip" title="Edit exam"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-danger btn-sm" onclick="openDeleteModal(${index})" data-bs-toggle="tooltip" title="Delete exam"><i class="fas fa-trash"></i></button>
+                    </td>
+                `;
+                examList.appendChild(tr);
+            });
+
+            updateChart();
+            initTooltips();
+        }
+
+        // Update Performance Chart
+        let scoreChart = null;
+        function updateChart() {
+            const exams = loadExams();
+            const chartSubject = document.getElementById('chartSubject').value;
+            const filteredExams = chartSubject ? exams.filter(exam => exam.subject === chartSubject) : exams;
+            filteredExams.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            const labels = filteredExams.map(exam => formatDate(exam.date));
+            const scores = filteredExams.map(exam => exam.score);
+
+            if (scoreChart) scoreChart.destroy();
+            const ctx = document.getElementById('scoreChart').getContext('2d');
+            scoreChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Exam Scores',
+                        data: scores,
+                        borderColor: '#60a5fa',
+                        backgroundColor: '#facc15',
+                        pointBackgroundColor: '#facc15',
+                        borderWidth: 2,
+                        fill: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: { display: true, text: 'Score', color: '#e2e8f0' },
+                            ticks: { color: '#e2e8f0' },
+                            grid: { borderColor: '#e2e8f0', color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        x: {
+                            title: { display: true, text: 'Date', color: '#e2e8f0' },
+                            ticks: { color: '#e2e8f0' },
+                            grid: { borderColor: '#e2e8f0', color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#e2e8f0' } }
+                    }
+                }
+            });
+        }
+
+        // Add Exam
+        document.getElementById('addExamForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const date = document.getElementById('examDate').value;
+            const subject = document.getElementById('subject').value.trim();
+            const score = parseInt(document.getElementById('score').value);
+            const notes = document.getElementById('notes').value.trim();
+            const imageInput = document.getElementById('image');
+            const file = imageInput.files[0];
+
+            if (!date || !subject || isNaN(score) || score < 0 || score > 100) {
+                alert('Please fill in all required fields with valid values (Score: 0-100).');
                 return;
             }
-            currentStudyIndex = 0;
-            document.getElementById('studyModeContainer').style.display = 'flex';
-            updateStudyCard();
-        }
 
-        function updateStudyCard() {
-            if (studyNotes.length === 0) return;
-            const note = studyNotes[currentStudyIndex];
-            document.getElementById('studySubject').textContent = note.subject;
-            document.getElementById('studyNote').textContent = studyModeType === 'flashcard' ? 'Click to reveal' : note.note;
-            document.getElementById('studyImage').classList.toggle('d-none', !note.image);
-            if (note.image) document.getElementById('studyImage').src = note.image;
-            document.getElementById('studyTags').textContent = note.tags.join(', ');
-            document.getElementById('prevNote').disabled = currentStudyIndex === 0;
-            document.getElementById('nextNote').disabled = currentStudyIndex === studyNotes.length - 1;
-            document.querySelector('.study-card').classList.toggle('dark-theme', localStorage.getItem('theme') === 'dark');
-
-            if (studyModeType === 'flashcard') {
-                document.getElementById('studyNote').onclick = () => {
-                    document.getElementById('studyNote').textContent = note.note;
-                    document.getElementById('studyNote').onclick = null;
-                };
-            } else {
-                document.getElementById('studyNote').onclick = null;
-            }
-        }
-
-        function exitStudyMode() {
-            document.getElementById('studyModeContainer').style.display = 'none';
-            document.getElementById('studyNote').onclick = null;
-        }
-
-        document.getElementById('prevNote').addEventListener('click', () => {
-            if (currentStudyIndex > 0) {
-                currentStudyIndex--;
-                updateStudyCard();
+            try {
+                const compressedImage = await compressImage(file);
+                const exams = loadExams();
+                exams.push({ date, subject, score, notes, image: compressedImage });
+                saveExams(exams);
+                updateSubjectFilter();
+                updateExams();
+                e.target.reset();
+            } catch (error) {
+                alert(error || 'Failed to process image.');
             }
         });
 
-        document.getElementById('nextNote').addEventListener('click', () => {
-            if (currentStudyIndex < studyNotes.length - 1) {
-                currentStudyIndex++;
-                updateStudyCard();
-            }
-        });
-
-        // Keyboard Navigation for Study Mode
-        document.addEventListener('keydown', (e) => {
-            if (document.getElementById('studyModeContainer').style.display === 'flex') {
-                if (e.key === 'ArrowLeft' && currentStudyIndex > 0) {
-                    currentStudyIndex--;
-                    updateStudyCard();
-                } else if (e.key === 'ArrowRight' && currentStudyIndex < studyNotes.length - 1) {
-                    currentStudyIndex++;
-                    updateStudyCard();
-                } else if (e.key === 'Escape') {
-                    exitStudyMode();
-                }
-            }
-        });
-
-        // Search and Filter
-        function applyFilters() {
-            const searchQuery = document.getElementById('searchInput').value;
-            const filterSubject = document.getElementById('subjectFilter').value;
-            const filterTag = document.getElementById('tagFilter').value;
-            const sortBy = document.getElementById('sortSelect').value;
-            displayNotes(filterSubject, filterTag, searchQuery, sortBy);
+        // View Exam
+        function viewExam(index) {
+            const exams = loadExams();
+            const exam = exams[index];
+            document.getElementById('viewDate').textContent = formatDate(exam.date);
+            document.getElementById('viewSubject').textContent = exam.subject;
+            document.getElementById('viewScore').textContent = exam.score;
+            document.getElementById('viewStatus').textContent = exam.score >= 60 ? 'Pass' : 'Fail';
+            document.getElementById('viewStatus').className = exam.score >= 60 ? 'pass' : 'fail';
+            document.getElementById('viewNotes').textContent = exam.notes || 'None';
+            document.getElementById('viewImage').innerHTML = exam.image ? `<img src="${exam.image}" alt="Exam Image">` : 'No image';
+            const viewModal = new bootstrap.Modal(document.getElementById('viewModal'));
+            viewModal.show();
         }
 
-        document.getElementById('searchInput').addEventListener('input', applyFilters);
-        document.getElementById('subjectFilter').addEventListener('change', applyFilters);
-        document.getElementById('tagFilter').addEventListener('change', applyFilters);
-        document.getElementById('sortSelect').addEventListener('change', applyFilters);
+        // Edit Exam
+        function editExam(index) {
+            const exams = loadExams();
+            const exam = exams[index];
+            const newDate = prompt('Enter new date (YYYY-MM-DD)', exam.date);
+            const newSubject = prompt('Enter new subject', exam.subject);
+            const newScore = prompt('Enter new score (0-100)', exam.score);
+            const newNotes = prompt('Enter new notes', exam.notes);
+            const replaceImage = confirm('Replace image? (OK to upload new, Cancel to keep/remove)');
 
-        // Tag Autocomplete
-        function updateTagSuggestions() {
-            const input = document.getElementById('tagsInput').value;
-            const lastTag = input.split(',').pop().trim().toLowerCase();
-            const suggestions = document.getElementById('tagSuggestions');
-            suggestions.innerHTML = '';
-            if (lastTag) {
-                const notes = loadNotes();
-                const allTags = [...new Set(notes.flatMap(note => note.tags))];
-                const matchingTags = allTags.filter(tag => tag.toLowerCase().startsWith(lastTag));
-                if (matchingTags.length > 0) {
-                    suggestions.style.display = 'block';
-                    matchingTags.forEach(tag => {
-                        const li = document.createElement('li');
-                        li.className = 'list-group-item';
-                        li.textContent = tag;
-                        li.onclick = () => {
-                            const tags = document.getElementById('tagsInput').value.split(',');
-                            tags[tags.length - 1] = tag;
-                            document.getElementById('tagsInput').value = tags.join(', ');
-                            suggestions.style.display = 'none';
+            if (newDate && newSubject && !isNaN(newScore) && newScore >= 0 && newScore <= 100) {
+                (async () => {
+                    let newImage = exam.image;
+                    if (replaceImage) {
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.accept = 'image/*';
+                        input.onchange = async (e) => {
+                            try {
+                                newImage = await compressImage(e.target.files[0]);
+                                exams[index] = { date: newDate, subject: newSubject.trim(), score: parseInt(newScore), notes: newNotes ? newNotes.trim() : '', image: newImage };
+                                saveExams(exams);
+                                updateSubjectFilter();
+                                updateExams();
+                            } catch (error) {
+                                alert(error || 'Failed to process image.');
+                            }
                         };
-                        suggestions.appendChild(li);
-                    });
-                } else {
-                    suggestions.style.display = 'none';
-                }
-            } else {
-                suggestions.style.display = 'none';
-            }
-        }
-
-        document.getElementById('tagsInput').addEventListener('input', updateTagSuggestions);
-
-        // Image Preview
-        document.getElementById('imageInput').addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const preview = document.getElementById('imagePreview');
-                preview.src = await compressImage(file);
-                preview.classList.remove('d-none');
-            }
-        });
-
-        // Character Count
-        document.getElementById('noteInput').addEventListener('input', () => {
-            const count = 500 - document.getElementById('noteInput').value.length;
-            document.getElementById('charCount').textContent = count;
-        });
-
-        // Import/Export
-        function exportNotes() {
-            const notes = loadNotes();
-            const blob = new Blob([JSON.stringify(notes, null, 2)], { type: 'application/json' });
-            const link = document.createElement('a');
-            link.download = `StudyBuddy_Notes_${new Date().toISOString().split('T')[0]}.json`;
-            link.href = URL.createObjectURL(blob);
-            link.click();
-            showToast('Notes exported successfully!');
-        }
-
-        document.getElementById('importInput').addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    try {
-                        const importedNotes = JSON.parse(event.target.result);
-                        if (Array.isArray(importedNotes)) {
-                            saveNotes(importedNotes);
-                            displayNotes();
-                            showToast('Notes imported successfully!');
-                        } else {
-                            showToast('Invalid JSON format.', 'danger');
-                        }
-                    } catch {
-                        showToast('Error importing notes.', 'danger');
+                        input.click();
+                    } else {
+                        newImage = confirm('Remove image?') ? null : exam.image;
+                        exams[index] = { date: newDate, subject: newSubject.trim(), score: parseInt(newScore), notes: newNotes ? newNotes.trim() : '', image: newImage };
+                        saveExams(exams);
+                        updateSubjectFilter();
+                        updateExams();
                     }
-                };
-                reader.readAsText(file);
+                })();
+            } else {
+                alert('Invalid input or score must be between 0 and 100.');
+            }
+        }
+
+        // Delete Exam
+        let deleteExamIndex = null;
+        function openDeleteModal(index) {
+            deleteExamIndex = index;
+            const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            deleteModal.show();
+        }
+
+        document.getElementById('confirmDelete').addEventListener('click', () => {
+            if (deleteExamIndex !== null) {
+                const exams = loadExams();
+                exams.splice(deleteExamIndex, 1);
+                saveExams(exams);
+                updateSubjectFilter();
+                updateExams();
+                deleteExamIndex = null;
+                const deleteModal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
+                deleteModal.hide();
             }
         });
 
-        // Toast Notification
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('successToast');
-            toast.querySelector('.toast-body').textContent = message;
-            toast.classList.remove('bg-success', 'bg-danger');
-            toast.classList.add(`bg-${type}`);
-            const bsToast = new bootstrap.Toast(toast);
-            bsToast.show();
+        // Chatbot
+        const chatbotResponses = {
+            'exam recap': 'The Exam Recap page lets you log past exams with date, subject, score, notes, and images. View, edit, or delete exams, sort by date or score, filter by subject, and see score trends!',
+            'add exam': 'Enter date, subject, score (0-100), optional notes, and an image (max 5MB, compressed automatically). Click "Add Exam" to save!',
+            'image upload': 'Upload an exam image (e.g., test paper) via the form. Images are compressed to save space and stored securely. View them in the details modal!',
+            'pass fail': 'Scores ≥60 are marked as Pass (green), and <60 as Fail (red). This helps track your performance!',
+            'progress': 'Exam scores and images feed into the Progress page for performance analysis. Add exams to see trends in the chart below!',
+            'hi': 'Hello! Welcome to StudyBuddy’s Exam Recap. I’m here to guide you. Try the suggestions below or ask me anything!'
+        };
+
+        function toggleChatbot() {
+            const panel = document.getElementById('chatbotPanel');
+            const toggle = document.getElementById('chatbotToggle');
+            panel.classList.toggle('open');
+            toggle.classList.toggle('open');
+            if (panel.classList.contains('open')) {
+                document.getElementById('chatbotInput').focus();
+            }
+        }
+
+        function closeChatbot() {
+            const panel = document.getElementById('chatbotPanel');
+            const toggle = document.getElementById('chatbotToggle');
+            panel.classList.remove('open');
+            toggle.classList.remove('open');
+        }
+
+        function clearChat() {
+            const messages = document.getElementById('chatbotMessages');
+            messages.innerHTML = `
+                <div class="chatbot-message">
+                    Welcome to StudyBuddy! I'm here to help. Earn <b>1 star per study hour</b> and <b>1 level per 5 hours</b>. Try the suggestions below or ask me anything!
+                </div>
+            `;
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function addChatMessage(message, isUser = false) {
+            const messages = document.getElementById('chatbotMessages');
+            const div = document.createElement('div');
+            div.className = `chatbot-message ${isUser ? 'user' : ''}`;
+            div.textContent = message;
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function sendSuggestion(query) {
+            const input = document.getElementById('chatbotInput');
+            input.value = query;
+            const event = new Event('submit');
+            document.getElementById('chatbotForm').dispatchEvent(event);
+        }
+
+        document.getElementById('chatbotForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const input = document.getElementById('chatbotInput');
+            const query = input.value.trim().toLowerCase();
+            if (!query) return;
+
+            addChatMessage(query, true);
+            const response = chatbotResponses[query] || 'Sorry, I didn’t understand that. Try the suggestions below or ask about "exam recap", "image upload", or "progress"!';
+            setTimeout(() => addChatMessage(response), 500);
+            input.value = '';
+        });
+
+        // Click Outside to Close Chatbot
+        document.addEventListener('click', (e) => {
+            const panel = document.getElementById('chatbotPanel');
+            const toggle = document.getElementById('chatbotToggle');
+            if (panel.classList.contains('open') && !panel.contains(e.target) && !toggle.contains(e.target)) {
+                closeChatbot();
+            }
+        });
+
+        // Initialize Tooltips
+        function initTooltips() {
+            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+            tooltipTriggerList.forEach(tooltipTriggerEl => {
+                new bootstrap.Tooltip(tooltipTriggerEl);
+            });
         }
 
         // Initialize
         function initialize() {
-            // Apply Theme
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            setTheme(savedTheme);
-
-            // Populate Subject Filter
-            const subjectFilter = document.getElementById('subjectFilter');
-            subjectFilter.innerHTML = '<option value="">All Subjects</option>';
-            ['Biology', 'Math', 'Physics', 'Chemistry', 'Other'].forEach(subject => {
-                const option = document.createElement('option');
-                option.value = subject;
-                option.textContent = subject;
-                subjectFilter.appendChild(option);
-            });
-
-            // Reset Modal on Close
-            document.getElementById('addNoteModal').addEventListener('hidden.bs.modal', () => {
-                document.getElementById('addNoteForm').reset();
-                document.getElementById('editIndex').value = '-1';
-                document.getElementById('imagePreview').classList.add('d-none');
-                document.getElementById('addNoteModalLabel').textContent = 'Add Note';
-                document.getElementById('charCount').textContent = '500';
-                document.getElementById('tagSuggestions').style.display = 'none';
-            });
-
-            displayNotes();
+            updateSessionTimer();
+            updateSubjectFilter();
+            updateExams();
+            initTooltips();
+            setInterval(updateSessionTimer, 1000);
+            document.getElementById('filterSubject').addEventListener('change', updateExams);
+            document.getElementById('chartSubject').addEventListener('change', updateChart);
         }
 
         initialize();
