@@ -3,818 +3,2237 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudyBuddy - Home</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <title>StudyBuddy - Smart Study Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
-
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
         body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #2a0645, #6b21a8); /* New purple-violet gradient */
-            color: #e2e8f0;
-            padding-bottom: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            overflow-x: hidden;
         }
-        .navbar {
-            background: rgba(30, 10, 60, 0.4) !important; /* Matches gradient */
-            backdrop-filter: blur(12px);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 0 0 12px 12px;
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
-        }
-        .navbar-brand, .nav-link {
-            color: #e2e8f0 !important;
-            font-weight: 500;
-            letter-spacing: 0.5px;
-            transition: color 0.3s, transform 0.3s;
-        }
-        .nav-link:hover {
-            color: #60a5fa !important;
-            transform: scale(1.05);
-        }
-        .navbar-toggler-icon {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%2360a5fa' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
-        }
-        .dashboard-container {
-            max-width: 1200px;
-            margin: 90px auto 30px;
-            padding: 30px;
-        }
-        .card {
+        
+        .glass {
             background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(12px);
+            backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        .card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+        
+        .glass-dark {
+            background: rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .card h5 {
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            color: #60a5fa; /* Highlighted heading */
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        .timer {
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: #facc15; /* Yellow highlight */
+        
+        .btn-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
         }
-        .session-timer {
-            position: fixed;
-            top: 70px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            padding: 10px 20px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-            z-index: 1001;
-            transition: background-color 0.3s, transform 0.3s;
+        
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
         }
-        .session-timer:hover {
-            transform: scale(1.05);
+        
+        .subject-biology { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .subject-chemistry { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .subject-physics { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .subject-math { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+        .subject-english { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); }
+        .subject-default { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        
+        .page {
+            display: none;
         }
-        .session-timer.green { background: rgba(34, 197, 94, 0.3); }
-        .session-timer.yellow { background: rgba(234, 179, 8, 0.3); }
-        .session-timer.red { background: rgba(239, 68, 68, 0.3); }
-        .chatbot-panel {
-            position: fixed;
-            top: 70px;
-            right: -300px;
-            width: 300px;
-            height: calc(100vh - 130px);
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px 0 0 12px;
-            box-shadow: -4px 0 16px rgba(0, 0, 0, 0.3);
-            z-index: 998;
-            transition: right 0.3s ease-in-out;
-            display: flex;
-            flex-direction: column;
+        
+        .page.active {
+            display: block;
         }
-        .chatbot-panel.open {
-            right: 0;
+        
+        .time-block {
+            transition: all 0.3s ease;
         }
-        .chatbot-header {
-            padding: 12px;
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 12px 0 0 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        
+        .time-block:hover {
+            transform: scale(1.02);
         }
-        .chatbot-header h5 {
-            margin: 0;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            color: #60a5fa;
+        
+        .mission-item {
+            transition: all 0.3s ease;
         }
-        .chatbot-header .close-btn, .chatbot-header .clear-btn {
-            background: transparent;
-            border: none;
-            color: #e2e8f0;
-            font-size: 1.3rem;
-            transition: color 0.3s, transform 0.3s;
-        }
-        .chatbot-header .close-btn:hover, .chatbot-header .clear-btn:hover {
-            color: #ef4444;
-            transform: scale(1.1);
-        }
-        .chatbot-body {
-            flex: 1;
-            padding: 12px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .chatbot-message {
-            background: rgba(255, 255, 255, 0.15);
-            padding: 10px 14px;
-            border-radius: 10px;
-            max-width: 80%;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-            animation: fadeIn 0.5s ease;
-        }
-        .chatbot-message.user {
-            background: rgba(167, 139, 250, 0.3); /* Matches gradient */
-            align-self: flex-end;
-        }
-        .chatbot-suggestions {
-            padding: 12px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            background: rgba(255, 255, 255, 0.1);
-        }
-        .chatbot-suggestion {
-            background: linear-gradient(45deg, #a78bfa, #7c3aed); /* Matches gradient */
-            border: none;
-            border-radius: 16px;
-            padding: 6px 12px;
-            color: #fff;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: transform 0.3s, background 0.3s;
-            animation: slideIn 0.5s ease;
-        }
-        .chatbot-suggestion:hover {
-            transform: scale(1.05);
-            background: linear-gradient(45deg, #7c3aed, #a78bfa);
-        }
-        .chatbot-footer {
-            padding: 12px;
-            background: rgba(255, 255, 255, 0.15);
-        }
-        .chatbot-footer input {
-            border-radius: 20px;
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: #e2e8f0;
-        }
-        .chatbot-footer input::placeholder {
-            color: #94a3b8;
-        }
-        .chatbot-footer .btn {
-            background: linear-gradient(45deg, #a78bfa, #7c3aed);
-            border: none;
-            border-radius: 20px;
-            transition: transform 0.3s;
-        }
-        .chatbot-footer .btn:hover {
-            transform: scale(1.05);
-            background: linear-gradient(45deg, #7c3aed, #a78bfa);
-        }
-        .chatbot-toggle {
-            position: fixed;
-            bottom: 70px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 1001;
-            animation: pulse 1.5s infinite;
-            transition: opacity 0.3s, transform 0.3s;
-        }
-        .chatbot-toggle:hover {
-            transform: scale(1.1);
-        }
-        .chatbot-toggle.open {
+        
+        .mission-item.completed {
             opacity: 0.7;
+            text-decoration: line-through;
         }
-        .chatbot-toggle i {
-            font-size: 1.5rem;
-            color: #e2e8f0;
+        
+        .progress-ring {
+            transform: rotate(-90deg);
         }
-        .quote-card {
-            font-style: italic;
-            background: rgba(255, 255, 255, 0.12);
+        
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.35s;
+            transform-origin: 50% 50%;
         }
-        .pomodoro-btn {
-            background: linear-gradient(45deg, #22c55e, #34d399);
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            transition: transform 0.3s, background 0.3s;
-        }
-        .pomodoro-btn:hover {
-            background: linear-gradient(45deg, #16a34a, #22c55e);
-            transform: scale(1.05);
-        }
-        .btn-primary, .btn-warning, .btn-danger {
-            border-radius: 8px;
-            transition: transform 0.3s, background 0.3s;
-        }
-        .btn-primary {
-            background: linear-gradient(45deg, #a78bfa, #7c3aed);
-            border: none;
-        }
-        .btn-primary:hover {
-            background: linear-gradient(45deg, #7c3aed, #a78bfa);
-            transform: scale(1.05);
-        }
-        .btn-warning {
-            background: linear-gradient(45deg, #eab308, #facc15);
-            border: none;
-        }
-        .btn-warning:hover {
-            background: linear-gradient(45deg, #ca8a04, #eab308);
-            transform: scale(1.05);
-        }
-        .btn-danger {
-            background: linear-gradient(45deg, #ef4444, #f87171);
-            border: none;
-        }
-        .btn-danger:hover {
-            background: linear-gradient(45deg, #dc2626, #ef4444);
-            transform: scale(1.05);
-        }
-        .star {
-            color: #facc15;
-        }
-        footer {
-            background: rgba(30, 10, 60, 0.7);
-            backdrop-filter: blur(12px);
-            color: #e2e8f0;
-            text-align: center;
-            padding: 8px 0;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            z-index: 1000;
-        }
+        
         @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.15); }
-            100% { transform: scale(1); }
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        
+        .pulse {
+            animation: pulse 2s infinite;
         }
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(10px); }
-            to { opacity: 1; transform: translateX(0); }
+        
+        .dark-mode {
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
         }
-        @media (max-width: 768px) {
-            .dashboard-container {
-                margin-top: 100px;
-                padding: 15px;
-            }
-            .timer {
-                font-size: 1.3rem;
-            }
-            .session-timer {
-                top: 60px;
-                right: 10px;
-                padding: 8px 15px;
-                font-size: 0.9rem;
-            }
-            .chatbot-panel {
-                width: 250px;
-                right: -250px;
-                height: calc(100vh - 120px);
-            }
-            .chatbot-panel.open {
-                right: 0;
-            }
-            .chatbot-toggle {
-                bottom: 60px;
-                right: 10px;
-                width: 40px;
-                height: 40px;
-            }
-            .chatbot-toggle i {
-                font-size: 1.2rem;
-            }
-            .chatbot-suggestion {
-                font-size: 0.75rem;
-                padding: 5px 10px;
-            }
-            .chatbot-header h5 {
-                font-size: 1rem;
-            }
-            .chatbot-message {
-                font-size: 0.85rem;
-            }
-            .card h5 {
-                font-size: 1.1rem;
-            }
+        
+        .dark-mode .glass {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        canvas {
+            max-height: 200px;
+            width: 100% !important;
+            height: auto !important;
         }
     </style>
 </head>
-<body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="index.html">StudyBuddy</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link active" href="index.html">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="routine.html">Routine</a></li>
-                    <li class="nav-item"><a class="nav-link" href="mission.html">Mission Board</a></li>
-                    <li class="nav-item"><a class="nav-link" href="exam-recap.html">Exam Recap</a></li>
-                    <li class="nav-item"><a class="nav-link" href="progress.html">Progress</a></li>
-                </ul>
+<body class="min-h-screen">
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 glass rounded-b-2xl mx-4 mt-4">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-graduation-cap text-2xl text-white"></i>
+                    <span class="text-xl font-bold text-white">StudyBuddy</span>
+                </div>
+                
+                <div class="hidden md:flex space-x-8">
+                    <button onclick="showPage('home')" class="nav-btn text-white hover:text-blue-200 transition-colors">
+                        <i class="fas fa-home mr-2"></i>Home
+                    </button>
+                    <button onclick="showPage('routine')" class="nav-btn text-white hover:text-blue-200 transition-colors">
+                        <i class="fas fa-calendar-alt mr-2"></i>Routine
+                    </button>
+                    <button onclick="showPage('mission')" class="nav-btn text-white hover:text-blue-200 transition-colors">
+                        <i class="fas fa-tasks mr-2"></i>Mission Board
+                    </button>
+                    <button onclick="showPage('recap')" class="nav-btn text-white hover:text-blue-200 transition-colors">
+                        <i class="fas fa-book-open mr-2"></i>Exam Recap
+                    </button>
+                    <button onclick="showPage('progress')" class="nav-btn text-white hover:text-blue-200 transition-colors">
+                        <i class="fas fa-chart-line mr-2"></i>Progress
+                    </button>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <button onclick="toggleDarkMode()" class="text-white hover:text-blue-200 transition-colors">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <button class="md:hidden text-white" onclick="toggleMobileMenu()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="hidden md:hidden glass-dark rounded-b-2xl mt-2 mx-4">
+            <div class="px-4 py-2 space-y-2">
+                <button onclick="showPage('home')" class="block w-full text-left text-white hover:text-blue-200 py-2">
+                    <i class="fas fa-home mr-2"></i>Home
+                </button>
+                <button onclick="showPage('routine')" class="block w-full text-left text-white hover:text-blue-200 py-2">
+                    <i class="fas fa-calendar-alt mr-2"></i>Routine
+                </button>
+                <button onclick="showPage('mission')" class="block w-full text-left text-white hover:text-blue-200 py-2">
+                    <i class="fas fa-tasks mr-2"></i>Mission Board
+                </button>
+                <button onclick="showPage('recap')" class="block w-full text-left text-white hover:text-blue-200 py-2">
+                    <i class="fas fa-book-open mr-2"></i>Exam Recap
+                </button>
+                <button onclick="showPage('progress')" class="block w-full text-left text-white hover:text-blue-200 py-2">
+                    <i class="fas fa-chart-line mr-2"></i>Progress
+                </button>
             </div>
         </div>
     </nav>
 
-    <!-- Session Timer -->
-    <div id="sessionTimer" class="session-timer green">
-        <i class="fas fa-clock me-2"></i>
-        <span id="countdownTimer">No active session</span>
-    </div>
-
-    <!-- Chatbot Toggle -->
-    <div class="chatbot-toggle" id="chatbotToggle" onclick="toggleChatbot()">
-        <i class="fas fa-robot"></i>
-    </div>
-
-    <!-- Chatbot Panel -->
-    <div class="chatbot-panel" id="chatbotPanel">
-        <div class="chatbot-header">
-            <h5>StudyBuddy Assistant</h5>
-            <div>
-                <button class="clear-btn" onclick="clearChat()"><i class="fas fa-trash"></i></button>
-                <button class="close-btn" onclick="closeChatbot()"><i class="fas fa-times"></i></button>
+    <!-- Main Content -->
+    <div class="pt-24 pb-20 px-4">
+        <!-- Home Page -->
+        <div id="home" class="page active max-w-7xl mx-auto">
+            <div class="text-center mb-8">
+                <h1 class="text-4xl md:text-6xl font-bold text-white mb-4 floating">
+                    Welcome to StudyBuddy
+                </h1>
+                <p class="text-xl text-white/80">Your smart offline study companion</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Live Clock -->
+                <div class="glass rounded-2xl p-6 text-center">
+                    <h3 class="text-lg font-semibold text-white mb-4">Current Time</h3>
+                    <div id="liveClock" class="text-3xl font-bold text-white mb-2"></div>
+                    <div id="currentDate" class="text-white/80"></div>
+                </div>
+                
+                <!-- Current Session -->
+                <div class="glass rounded-2xl p-6">
+                    <h3 class="text-lg font-semibold text-white mb-4">Current Session</h3>
+                    <div id="currentSession" class="text-white">
+                        <div class="text-center py-4">
+                            <i class="fas fa-clock text-4xl text-white/50 mb-2"></i>
+                            <p class="text-white/80">No active session</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Study Timer -->
+                <div class="glass rounded-2xl p-6 text-center">
+                    <h3 class="text-lg font-semibold text-white mb-4">Study Timer</h3>
+                    <div id="timerDisplay" class="text-3xl font-bold text-white mb-4">00:00:00</div>
+                    <select id="timerSubject" class="glass rounded-lg px-4 py-2 text-white border-0 focus:ring-2 focus:ring-blue-400 mb-4">
+                        <option value="biology">Biology</option>
+                        <option value="chemistry">Chemistry</option>
+                        <option value="physics">Physics</option>
+                        <option value="math">Mathematics</option>
+                        <option value="english">English</option>
+                        <option value="other" selected>Other</option>
+                    </select>
+                    <div class="flex justify-center space-x-2">
+                        <button onclick="startTimer()" class="btn-gradient text-white px-4 py-2 rounded-lg">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <button onclick="pauseTimer()" class="btn-gradient text-white px-4 py-2 rounded-lg">
+                            <i class="fas fa-pause"></i>
+                        </button>
+                        <button onclick="resetTimer()" class="btn-gradient text-white px-4 py-2 rounded-lg">
+                            <i class="fas fa-stop"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Today's Progress -->
+                <div class="glass rounded-2xl p-6">
+                    <h3 class="text-lg font-semibold text-white mb-4">Today's Progress</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between text-white">
+                            <span>Study Time</span>
+                            <span id="todayStudyTime">0h 0m</span>
+                        </div>
+                        <div class="w-full bg-white/20 rounded-full h-2">
+                            <div id="todayProgressBar" class="btn-gradient h-2 rounded-full" style="width: 0%"></div>
+                        </div>
+                        <div class="flex justify-between text-white">
+                            <span>Missions Completed</span>
+                            <span id="todayMissions">0/0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Upcoming Session -->
+                <div class="glass rounded-2xl p-6">
+                    <h3 class="text-lg font-semibold text-white mb-4">Next Session</h3>
+                    <div id="nextSession" class="text-white">
+                        <div class="text-center py-4">
+                            <i class="fas fa-calendar-check text-4xl text-white/50 mb-2"></i>
+                            <p class="text-white/80">No upcoming sessions</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Motivational Quote -->
+                <div class="glass rounded-2xl p-6 text-center">
+                    <h3 class="text-lg font-semibold text-white mb-4">Daily Motivation</h3>
+                    <div id="dailyQuote" class="text-white/90 italic">
+                        "Success is the sum of small efforts repeated day in and day out."
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="chatbot-body" id="chatbotMessages">
-            <div class="chatbot-message">
-                Welcome to StudyBuddy! I'm here to help. Earn <b>1 star per study hour</b> and <b>1 level per 5 hours</b>. Try the suggestions below or ask me anything!
+
+        <!-- Routine Page -->
+        <div id="routine" class="page max-w-7xl mx-auto">
+            <div class="flex justify-between items-center mb-8">
+                <h1 class="text-3xl font-bold text-white">Weekly Study Routine</h1>
+                <div class="flex space-x-2">
+                    <button onclick="exportRoutineToPDF()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">
+                        <i class="fas fa-file-pdf mr-2"></i>Export PDF
+                    </button>
+                    <button onclick="showAddRoutineModal()" class="btn-gradient text-white px-4 py-2 rounded-lg">
+                        <i class="fas fa-plus mr-2"></i>Add Session
+                    </button>
+                    <button onclick="resetRoutine()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
+                        <i class="fas fa-trash mr-2"></i>Reset All
+                    </button>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-7 gap-4">
+                <div class="glass rounded-2xl p-4" data-day="sunday">
+                    <h3 class="text-lg font-semibold text-white mb-4 text-center">Sunday</h3>
+                    <div class="routine-day space-y-2" id="sunday-schedule"></div>
+                </div>
+                <div class="glass rounded-2xl p-4" data-day="monday">
+                    <h3 class="text-lg font-semibold text-white mb-4 text-center">Monday</h3>
+                    <div class="routine-day space-y-2" id="monday-schedule"></div>
+                </div>
+                <div class="glass rounded-2xl p-4" data-day="tuesday">
+                    <h3 class="text-lg font-semibold text-white mb-4 text-center">Tuesday</h3>
+                    <div class="routine-day space-y-2" id="tuesday-schedule"></div>
+                </div>
+                <div class="glass rounded-2xl p-4" data-day="wednesday">
+                    <h3 class="text-lg font-semibold text-white mb-4 text-center">Wednesday</h3>
+                    <div class="routine-day space-y-2" id="wednesday-schedule"></div>
+                </div>
+                <div class="glass rounded-2xl p-4" data-day="thursday">
+                    <h3 class="text-lg font-semibold text-white mb-4 text-center">Thursday</h3>
+                    <div class="routine-day space-y-2" id="thursday-schedule"></div>
+                </div>
+                <div class="glass rounded-2xl p-4" data-day="friday">
+                    <h3 class="text-lg font-semibold text-white mb-4 text-center">Friday</h3>
+                    <div class="routine-day space-y-2" id="friday-schedule"></div>
+                </div>
+                <div class="glass rounded-2xl p-4" data-day="saturday">
+                    <h3 class="text-lg font-semibold text-white mb-4 text-center">Saturday</h3>
+                    <div class="routine-day space-y-2" id="saturday-schedule"></div>
+                </div>
             </div>
         </div>
-        <div class="chatbot-suggestions">
-            <button class="chatbot-suggestion" onclick="sendSuggestion('stopwatch')">How do I use the stopwatch?</button>
-            <button class="chatbot-suggestion" onclick="sendSuggestion('pomodoro')">What is Pomodoro mode?</button>
-            <button class="chatbot-suggestion" onclick="sendSuggestion('stars')">How do I earn stars?</button>
-            <button class="chatbot-suggestion" onclick="sendSuggestion('missions')">How do missions work?</button>
-            <button class="chatbot-suggestion" onclick="sendSuggestion('notes')">How do I take notes?</button>
+
+        <!-- Mission Board Page -->
+        <div id="mission" class="page max-w-4xl mx-auto">
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h1 class="text-3xl font-bold text-white">Mission Board</h1>
+                    <p class="text-white/80" id="missionDate">Today's Study Goals</p>
+                </div>
+                <div class="flex space-x-2">
+                    <button onclick="generateRoutineMissions()" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg">
+                        <i class="fas fa-magic mr-2"></i>Auto Generate
+                    </button>
+                    <button onclick="showAddMissionModal()" class="btn-gradient text-white px-4 py-2 rounded-lg">
+                        <i class="fas fa-plus mr-2"></i>Add Mission
+                    </button>
+                </div>
+            </div>
+            
+            <div class="glass rounded-2xl p-6 mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-white">Daily Progress</h3>
+                    <span id="missionProgress" class="text-white font-semibold">0%</span>
+                </div>
+                <div class="w-full bg-white/20 rounded-full h-3">
+                    <div id="missionProgressBar" class="btn-gradient h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+                <div class="flex justify-between text-white/80 text-sm mt-2">
+                    <span>Routine-based missions</span>
+                    <span id="routineMissionCount">0 generated</span>
+                </div>
+            </div>
+            
+            <div id="missionList" class="space-y-4">
+                <!-- Missions will be loaded here -->
+            </div>
         </div>
-        <div class="chatbot-footer">
-            <form id="chatbotForm">
-                <div class="input-group">
-                    <input type="text" id="chatbotInput" class="form-control" placeholder="Ask me something..." autocomplete="off">
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i></button>
+
+        <!-- Exam Recap Page -->
+        <div id="recap" class="page max-w-6xl mx-auto">
+            <div class="flex justify-between items-center mb-8">
+                <h1 class="text-3xl font-bold text-white">Exam Recap Notes</h1>
+                <div class="flex space-x-2">
+                    <button onclick="showAddImageModal()" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg">
+                        <i class="fas fa-image mr-2"></i>Add Image
+                    </button>
+                    <button onclick="showAddNoteModal()" class="btn-gradient text-white px-4 py-2 rounded-lg">
+                        <i class="fas fa-plus mr-2"></i>Add Note
+                    </button>
+                </div>
+            </div>
+            
+            <div class="flex flex-wrap gap-4 mb-6">
+                <input type="text" id="noteSearch" placeholder="Search notes..." 
+                       class="glass rounded-lg px-4 py-2 text-white placeholder-white/60 border-0 focus:ring-2 focus:ring-blue-400">
+                <select id="subjectFilter" class="glass rounded-lg px-4 py-2 text-white border-0 focus:ring-2 focus:ring-blue-400">
+                    <option value="">All Subjects</option>
+                    <option value="biology">Biology</option>
+                    <option value="chemistry">Chemistry</option>
+                    <option value="physics">Physics</option>
+                    <option value="math">Mathematics</option>
+                    <option value="english">English</option>
+                </select>
+                <select id="typeFilter" class="glass rounded-lg px-4 py-2 text-white border-0 focus:ring-2 focus:ring-blue-400">
+                    <option value="">All Types</option>
+                    <option value="text">Text Notes</option>
+                    <option value="image">Images</option>
+                </select>
+                <button onclick="toggleFlashcardMode()" class="btn-gradient text-white px-4 py-2 rounded-lg">
+                    <i class="fas fa-eye mr-2"></i>Flashcard Mode
+                </button>
+            </div>
+            
+            <div id="notesList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Notes will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Progress Page -->
+        <div id="progress" class="page max-w-7xl mx-auto">
+            <h1 class="text-3xl font-bold text-white mb-8 text-center">Study Progress Analytics</h1>
+            
+            <!-- Achievement System -->
+            <div class="glass rounded-2xl p-6 mb-8">
+                <h3 class="text-lg font-semibold text-white mb-4">Recent Achievements</h3>
+                <div id="achievementsList" class="flex flex-wrap gap-3">
+                    <!-- Achievements will be loaded here -->
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+                <!-- Level System -->
+                <div class="glass rounded-2xl p-6 text-center">
+                    <h3 class="text-lg font-semibold text-white mb-4">Study Level</h3>
+                    <div id="levelIcon" class="text-4xl mb-2">⭐</div>
+                    <div id="studyLevel" class="text-2xl font-bold text-white">Level 1</div>
+                    <div id="levelProgress" class="text-white/80 text-sm">0/5 hours to next level</div>
+                    <div class="w-full bg-white/20 rounded-full h-2 mt-2">
+                        <div id="levelProgressBar" class="btn-gradient h-2 rounded-full" style="width: 0%"></div>
+                    </div>
+                </div>
+                
+                <!-- Total Study Time -->
+                <div class="glass rounded-2xl p-6 text-center">
+                    <h3 class="text-lg font-semibold text-white mb-4">Total Study Time</h3>
+                    <div id="totalStudyTime" class="text-3xl font-bold text-white">0h 0m</div>
+                    <div class="text-white/80 text-sm">All time</div>
+                    <div id="studyRank" class="text-yellow-400 text-xs mt-1">Beginner</div>
+                </div>
+                
+                <!-- Weekly Goal -->
+                <div class="glass rounded-2xl p-6 text-center">
+                    <h3 class="text-lg font-semibold text-white mb-4">Weekly Goal</h3>
+                    <div class="relative w-20 h-20 mx-auto mb-2">
+                        <svg class="progress-ring w-20 h-20">
+                            <circle class="progress-ring-circle" stroke="rgba(255,255,255,0.2)" stroke-width="4" 
+                                    fill="transparent" r="36" cx="40" cy="40"/>
+                            <circle id="weeklyGoalCircle" class="progress-ring-circle" stroke="url(#gradient)" 
+                                    stroke-width="4" fill="transparent" r="36" cx="40" cy="40"
+                                    stroke-dasharray="226.19" stroke-dashoffset="226.19"/>
+                            <defs>
+                                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" style="stop-color:#667eea"/>
+                                    <stop offset="100%" style="stop-color:#764ba2"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span id="weeklyGoalPercent" class="text-white font-bold">0%</span>
+                        </div>
+                    </div>
+                    <div class="text-white/80 text-sm">25h weekly target</div>
+                </div>
+                
+                <!-- Streak -->
+                <div class="glass rounded-2xl p-6 text-center">
+                    <h3 class="text-lg font-semibold text-white mb-4">Study Streak</h3>
+                    <div class="text-4xl mb-2">🔥</div>
+                    <div id="studyStreak" class="text-3xl font-bold text-white">0</div>
+                    <div class="text-white/80 text-sm">days</div>
+                    <div id="bestStreak" class="text-green-400 text-xs mt-1">Best: 0</div>
+                </div>
+                
+                <!-- Productivity Score -->
+                <div class="glass rounded-2xl p-6 text-center">
+                    <h3 class="text-lg font-semibold text-white mb-4">Productivity</h3>
+                    <div class="text-4xl mb-2">📊</div>
+                    <div id="productivityScore" class="text-3xl font-bold text-white">0%</div>
+                    <div class="text-white/80 text-sm">This week</div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <!-- Study Time Chart -->
+                <div class="glass rounded-2xl p-6">
+                    <h3 class="text-lg font-semibold text-white mb-4">Weekly Study Time</h3>
+                    <canvas id="studyTimeChart"></canvas>
+                </div>
+                
+                <!-- Subject Distribution -->
+                <div class="glass rounded-2xl p-6">
+                    <h3 class="text-lg font-semibold text-white mb-4">Subject Distribution</h3>
+                    <canvas id="subjectChart"></canvas>
+                </div>
+                
+                <!-- Performance Trends -->
+                <div class="glass rounded-2xl p-6">
+                    <h3 class="text-lg font-semibold text-white mb-4">Monthly Trends</h3>
+                    <canvas id="trendsChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Detailed Analytics -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Study Insights -->
+                <div class="glass rounded-2xl p-6">
+                    <h3 class="text-lg font-semibold text-white mb-4">Study Insights</h3>
+                    <div id="studyInsights" class="space-y-3">
+                        <!-- Insights will be loaded here -->
+                    </div>
+                </div>
+                
+                <!-- Goals & Recommendations -->
+                <div class="glass rounded-2xl p-6">
+                    <h3 class="text-lg font-semibold text-white mb-4">Recommendations</h3>
+                    <div id="recommendations" class="space-y-3">
+                        <!-- Recommendations will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Add Routine Modal -->
+    <div id="addRoutineModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="glass rounded-2xl p-6 w-full max-w-md">
+            <h3 class="text-xl font-semibold text-white mb-4">Add Study Session</h3>
+            <form id="routineForm" class="space-y-4">
+                <select id="routineDay" class="w-full glass rounded-lg px-4 py-2 text-white border-0 focus:ring-2 focus:ring-blue-400">
+                    <option value="sunday">Sunday</option>
+                    <option value="monday">Monday</option>
+                    <option value="tuesday">Tuesday</option>
+                    <option value="wednesday">Wednesday</option>
+                    <option value="thursday">Thursday</option>
+                    <option value="friday">Friday</option>
+                    <option value="saturday">Saturday</option>
+                </select>
+                <input type="time" id="routineStartTime" class="w-full glass rounded-lg px-4 py-2 text-white border-0 focus:ring-2 focus:ring-blue-400">
+                <input type="time" id="routineEndTime" class="w-full glass rounded-lg px-4 py-2 text-white border-0 focus:ring-2 focus:ring-blue-400">
+                <select id="routineSubject" class="w-full glass rounded-lg px-4 py-2 text-white border-0 focus:ring-2 focus:ring-blue-400">
+                    <option value="biology">Biology</option>
+                    <option value="chemistry">Chemistry</option>
+                    <option value="physics">Physics</option>
+                    <option value="math">Mathematics</option>
+                    <option value="english">English</option>
+                    <option value="other">Other</option>
+                </select>
+                <div class="flex space-x-2">
+                    <button type="submit" class="btn-gradient text-white px-4 py-2 rounded-lg flex-1">Add Session</button>
+                    <button type="button" onclick="closeModal('addRoutineModal')" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">Cancel</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Dashboard Content -->
-    <div class="dashboard-container">
-        <h1 class="text-center mb-5" style="font-weight: 700; letter-spacing: 1px; color: #60a5fa;">Study Dashboard</h1>
-        <div class="row">
-            <!-- Live Time and Day -->
-            <div class="col-md-4 mb-4">
-                <div class="card" data-tooltip="Shows the current time and day">
-                    <div class="card-body text-center">
-                        <h5><i class="fas fa-calendar-day me-2"></i>Current Time & Day</h5>
-                        <p id="liveTime" class="timer"></p>
-                        <p id="currentDay"></p>
+    <!-- Add Mission Modal -->
+    <div id="addMissionModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="glass rounded-2xl p-6 w-full max-w-md">
+            <h3 class="text-xl font-semibold text-white mb-4">Add Study Mission</h3>
+            <form id="missionForm" class="space-y-4">
+                <input type="text" id="missionTitle" placeholder="Mission title..." class="w-full glass rounded-lg px-4 py-2 text-white placeholder-white/60 border-0 focus:ring-2 focus:ring-blue-400">
+                <select id="missionSubject" class="w-full glass rounded-lg px-4 py-2 text-white border-0 focus:ring-2 focus:ring-blue-400">
+                    <option value="biology">Biology</option>
+                    <option value="chemistry">Chemistry</option>
+                    <option value="physics">Physics</option>
+                    <option value="math">Mathematics</option>
+                    <option value="english">English</option>
+                    <option value="other">Other</option>
+                </select>
+                <select id="missionPriority" class="w-full glass rounded-lg px-4 py-2 text-white border-0 focus:ring-2 focus:ring-blue-400">
+                    <option value="low">Low Priority</option>
+                    <option value="medium">Medium Priority</option>
+                    <option value="high">High Priority</option>
+                </select>
+                <div class="flex space-x-2">
+                    <button type="submit" class="btn-gradient text-white px-4 py-2 rounded-lg flex-1">Add Mission</button>
+                    <button type="button" onclick="closeModal('addMissionModal')" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Note Modal -->
+    <div id="addNoteModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="glass rounded-2xl p-6 w-full max-w-lg">
+            <h3 class="text-xl font-semibold text-white mb-4">Add Study Note</h3>
+            <form id="noteForm" class="space-y-4">
+                <input type="text" id="noteTitle" placeholder="Note title..." class="w-full glass rounded-lg px-4 py-2 text-white placeholder-white/60 border-0 focus:ring-2 focus:ring-blue-400">
+                <select id="noteSubject" class="w-full glass rounded-lg px-4 py-2 text-white border-0 focus:ring-2 focus:ring-blue-400">
+                    <option value="biology">Biology</option>
+                    <option value="chemistry">Chemistry</option>
+                    <option value="physics">Physics</option>
+                    <option value="math">Mathematics</option>
+                    <option value="english">English</option>
+                    <option value="other">Other</option>
+                </select>
+                <textarea id="noteContent" placeholder="Note content..." rows="4" class="w-full glass rounded-lg px-4 py-2 text-white placeholder-white/60 border-0 focus:ring-2 focus:ring-blue-400"></textarea>
+                <input type="text" id="noteTags" placeholder="Tags (comma separated)..." class="w-full glass rounded-lg px-4 py-2 text-white placeholder-white/60 border-0 focus:ring-2 focus:ring-blue-400">
+                <div class="flex items-center space-x-2">
+                    <input type="checkbox" id="notePinned" class="rounded">
+                    <label for="notePinned" class="text-white">Pin this note</label>
+                </div>
+                <div class="flex space-x-2">
+                    <button type="submit" class="btn-gradient text-white px-4 py-2 rounded-lg flex-1">Add Note</button>
+                    <button type="button" onclick="closeModal('addNoteModal')" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Image Modal -->
+    <div id="addImageModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="glass rounded-2xl p-6 w-full max-w-lg">
+            <h3 class="text-xl font-semibold text-white mb-4">Add Study Image</h3>
+            <form id="imageForm" class="space-y-4">
+                <input type="text" id="imageTitle" placeholder="Image title..." class="w-full glass rounded-lg px-4 py-2 text-white placeholder-white/60 border-0 focus:ring-2 focus:ring-blue-400">
+                <select id="imageSubject" class="w-full glass rounded-lg px-4 py-2 text-white border-0 focus:ring-2 focus:ring-blue-400">
+                    <option value="biology">Biology</option>
+                    <option value="chemistry">Chemistry</option>
+                    <option value="physics">Physics</option>
+                    <option value="math">Mathematics</option>
+                    <option value="english">English</option>
+                    <option value="other">Other</option>
+                </select>
+                <div class="border-2 border-dashed border-white/30 rounded-lg p-6 text-center">
+                    <input type="file" id="imageFile" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+                    <div id="imagePreview" class="hidden">
+                        <img id="previewImg" class="max-w-full h-32 object-contain mx-auto mb-2 rounded">
+                        <p class="text-white/80 text-sm" id="imageInfo"></p>
+                    </div>
+                    <div id="uploadPrompt">
+                        <i class="fas fa-cloud-upload-alt text-4xl text-white/50 mb-2"></i>
+                        <p class="text-white/80 mb-2">Click to upload image</p>
+                        <button type="button" onclick="document.getElementById('imageFile').click()" class="btn-gradient text-white px-4 py-2 rounded-lg">
+                            Choose File
+                        </button>
                     </div>
                 </div>
-            </div>
-            <!-- Current Session -->
-            <div class="col-md-4 mb-4">
-                <div class="card" data-tooltip="Displays your current study session">
-                    <div class="card-body">
-                        <h5><i class="fas fa-book-open me-2"></i>Current Session</h5>
-                        <p id="currentSession">No active session</p>
-                    </div>
+                <textarea id="imageDescription" placeholder="Image description (optional)..." rows="2" class="w-full glass rounded-lg px-4 py-2 text-white placeholder-white/60 border-0 focus:ring-2 focus:ring-blue-400"></textarea>
+                <input type="text" id="imageTags" placeholder="Tags (comma separated)..." class="w-full glass rounded-lg px-4 py-2 text-white placeholder-white/60 border-0 focus:ring-2 focus:ring-blue-400">
+                <div class="flex items-center space-x-2">
+                    <input type="checkbox" id="imagePinned" class="rounded">
+                    <label for="imagePinned" class="text-white">Pin this image</label>
                 </div>
-            </div>
-            <!-- Stopwatch -->
-            <div class="col-md-4 mb-4">
-                <div class="card" data-tooltip="Track your study time or start a 25-min Pomodoro session">
-                    <div class="card-body text-center">
-                        <h5><i class="fas fa-stopwatch me-2"></i>Study Stopwatch</h5>
-                        <p id="stopwatch" class="timer">00:00:00</p>
-                        <button class="btn btn-primary me-1" onclick="startStopwatch()"><i class="fas fa-play"></i> Start</button>
-                        <button class="btn btn-warning me-1" onclick="pauseStopwatch()"><i class="fas fa-pause"></i> Pause</button>
-                        <button class="btn btn-danger" onclick="resetStopwatch()"><i class="fas fa-stop"></i> Reset</button>
-                        <button class="btn pomodoro-btn mt-2" onclick="startPomodoro()"><i class="fas fa-hourglass-start"></i> Start Pomodoro</button>
-                    </div>
+                <div class="flex space-x-2">
+                    <button type="submit" class="btn-gradient text-white px-4 py-2 rounded-lg flex-1">Add Image</button>
+                    <button type="button" onclick="closeModal('addImageModal')" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">Cancel</button>
                 </div>
-            </div>
-            <!-- Daily Study Total -->
-            <div class="col-md-4 mb-4">
-                <div class="card" data-tooltip="Total study time today">
-                    <div class="card-body">
-                        <h5><i class="fas fa-chart-line me-2"></i>Daily Study Total</h5>
-                        <p id="dailyTotal">0 minutes</p>
-                    </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Session Modal -->
+    <div id="editSessionModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="glass rounded-2xl p-6 w-full max-w-md">
+            <h3 class="text-xl font-semibold text-white mb-4">Edit Study Session</h3>
+            <form id="editSessionForm" class="space-y-4">
+                <select id="editRoutineDay" class="w-full glass rounded-lg px-4 py-2 text-white border-0 focus:ring-2 focus:ring-blue-400">
+                    <option value="sunday">Sunday</option>
+                    <option value="monday">Monday</option>
+                    <option value="tuesday">Tuesday</option>
+                    <option value="wednesday">Wednesday</option>
+                    <option value="thursday">Thursday</option>
+                    <option value="friday">Friday</option>
+                    <option value="saturday">Saturday</option>
+                </select>
+                <input type="time" id="editRoutineStartTime" class="w-full glass rounded-lg px-4 py-2 text-white border-0 focus:ring-2 focus:ring-blue-400">
+                <input type="time" id="editRoutineEndTime" class="w-full glass rounded-lg px-4 py-2 text-white border-0 focus:ring-2 focus:ring-blue-400">
+                <select id="editRoutineSubject" class="w-full glass rounded-lg px-4 py-2 text-white border-0 focus:ring-2 focus:ring-blue-400">
+                    <option value="biology">Biology</option>
+                    <option value="chemistry">Chemistry</option>
+                    <option value="physics">Physics</option>
+                    <option value="math">Mathematics</option>
+                    <option value="english">English</option>
+                    <option value="other">Other</option>
+                </select>
+                <div class="flex space-x-2">
+                    <button type="submit" class="btn-gradient text-white px-4 py-2 rounded-lg flex-1">Update Session</button>
+                    <button type="button" onclick="closeModal('editSessionModal')" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">Cancel</button>
                 </div>
-            </div>
-            <!-- Upcoming Session -->
-            <div class="col-md-4 mb-4">
-                <div class="card" data-tooltip="Next scheduled study session">
-                    <div class="card-body">
-                        <h5><i class="fas fa-forward me-2"></i>Upcoming Session</h5>
-                        <p id="upcomingSession">No upcoming sessions today</p>
-                    </div>
-                </div>
-            </div>
-            <!-- Today's Mission -->
-            <div class="col-md-4 mb-4">
-                <div class="card" data-tooltip="Your current mission from the Mission Board">
-                    <div class="card-body">
-                        <h5><i class="fas fa-bullseye me-2"></i>Today's Mission</h5>
-                        <p id="todayMission">No missions set (see Mission Board)</p>
-                    </div>
-                </div>
-            </div>
-            <!-- Gamification -->
-            <div class="col-md-4 mb-4">
-                <div class="card" data-tooltip="Track your stars and level based on study time">
-                    <div class="card-body text-center">
-                        <h5><i class="fas fa-star me-2"></i>Gamification</h5>
-                        <p>Stars: <span id="starsEarned" class="star"></span></p>
-                        <p>Level: <span id="level"></span></p>
-                    </div>
-                </div>
-            </div>
-            <!-- Motivational Quote -->
-            <div class="col-12">
-                <div class="card quote-card" data-tooltip="Daily inspiration to keep you motivated">
-                    <div class="card-body text-center">
-                        <h5><i class="fas fa-quote-left me-2"></i>Quote of the Day</h5>
-                        <p id="motivationalQuote"></p>
-                    </div>
-                </div>
-            </div>
+            </form>
         </div>
     </div>
 
     <!-- Footer -->
-    <footer>
-        <p>© 2025 Urfa Hasan Fattah. All rights reserved.</p>
+    <footer class="fixed bottom-0 left-0 right-0 glass-dark text-center py-3 mx-4 mb-4 rounded-t-2xl">
+        <p class="text-white/80 text-sm">© 2025 Urfa Hasan Fattah. All rights reserved.</p>
     </footer>
 
-    <!-- Bootstrap JS and Popper.js -->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
     <script>
-        // LocalStorage Management
-        function loadRoutine() {
-            return JSON.parse(localStorage.getItem('studyRoutine')) || {
-                Sunday: [], Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [], Saturday: []
-            };
-        }
+        // Global Variables
+        let currentPage = 'home';
+        let studyTimer = { running: false, startTime: 0, elapsed: 0 };
+        let timerInterval;
+        let clockInterval;
+        let isDarkMode = false;
+        let editingSession = null;
+        let currentImageData = null;
+        let editingMissionIndex = null;
+        let editingNoteIndex = null;
 
-        function saveRoutine(routine) {
-            localStorage.setItem('studyRoutine', JSON.stringify(routine));
-        }
+        // Add jsPDF library
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+        document.head.appendChild(script);
 
-        function loadMissions() {
-            return JSON.parse(localStorage.getItem('studyMissions')) || {
-                Sunday: [], Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [], Saturday: []
-            };
-        }
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+            startClock();
+            loadData();
+            updateDashboard();
+        });
 
-        function loadStudyData() {
-            return JSON.parse(localStorage.getItem('studyData')) || {
-                dailyTotals: {}, // { "YYYY-MM-DD": minutes }
-                pomodoroSessions: 0
-            };
-        }
-
-        function saveStudyData(data) {
-            localStorage.setItem('studyData', JSON.stringify(data));
-        }
-
-        // Convert 24-hour time to 12-hour format
-        function sessionTimeTo12Hour(time) {
-            const [hours, minutes] = time.split(':').map(Number);
-            const period = hours >= 12 ? 'PM' : 'AM';
-            const adjustedHours = hours % 12 || 12;
-            return `${adjustedHours}:${minutes.toString().padStart(2, '0')} ${period}`;
-        }
-
-        // Live Time and Day
-        function updateLiveTime() {
-            const now = new Date();
-            document.getElementById('liveTime').textContent = now.toLocaleTimeString('en-US', { hour12: true });
-            document.getElementById('currentDay').textContent = now.toLocaleDateString('en-US', { weekday: 'long' });
-        }
-
-        // Current and Upcoming Sessions, Today's Mission, Session Timer
-        function updateSessions() {
-            const now = new Date();
-            const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' });
-            const currentTime = now.toTimeString().slice(0, 5); // HH:MM
-            const routine = loadRoutine();
-            const missions = loadMissions();
-            const todaySessions = routine[currentDay] || [];
-            const todayMissions = missions[currentDay] || [];
-
-            // Current Session
-            const currentSession = todaySessions.find(session =>
-                currentTime >= session.startTime && currentTime < session.endTime
-            );
-            document.getElementById('currentSession').textContent = currentSession
-                ? `${sessionTimeTo12Hour(currentSession.startTime)} - ${sessionTimeTo12Hour(currentSession.endTime)}: ${currentSession.subject}`
-                : 'No active session';
-
-            // Session Timer
-            const timerElement = document.getElementById('sessionTimer');
-            const countdownElement = document.getElementById('countdownTimer');
-            if (currentSession) {
-                const [hours, minutes] = currentSession.endTime.split(':').map(Number);
-                const endTime = new Date(now);
-                endTime.setHours(hours, minutes, 0, 0);
-                const timeLeft = endTime - now;
-                if (timeLeft > 0) {
-                    const totalMinutes = ((hours * 60 + minutes) - (now.getHours() * 60 + now.getMinutes()));
-                    const percentLeft = (timeLeft / (totalMinutes * 60 * 1000)) * 100;
-                    const minutesLeft = Math.floor(timeLeft / 1000 / 60);
-                    const secondsLeft = Math.floor((timeLeft / 1000) % 60);
-                    countdownElement.textContent = `${minutesLeft}m ${secondsLeft}s left`;
-                    timerElement.className = `session-timer ${
-                        percentLeft > 50 ? 'green' : percentLeft > 20 ? 'yellow' : 'red'
-                    }`;
-                } else {
-                    countdownElement.textContent = 'Session ended';
-                    timerElement.className = 'session-timer green';
-                }
-            } else {
-                countdownElement.textContent = 'No active session';
-                timerElement.className = 'session-timer green';
+        function initializeApp() {
+            // Initialize default data if not exists
+            if (!localStorage.getItem('studyBuddy_routine')) {
+                localStorage.setItem('studyBuddy_routine', JSON.stringify({}));
             }
+            if (!localStorage.getItem('studyBuddy_missions')) {
+                localStorage.setItem('studyBuddy_missions', JSON.stringify([]));
+            }
+            if (!localStorage.getItem('studyBuddy_notes')) {
+                localStorage.setItem('studyBuddy_notes', JSON.stringify([]));
+            }
+            if (!localStorage.getItem('studyBuddy_progress')) {
+                localStorage.setItem('studyBuddy_progress', JSON.stringify({
+                    totalStudyTime: 0,
+                    dailyStudyTime: {},
+                    weeklyStudyTime: {},
+                    subjectTime: {},
+                    level: 1,
+                    streak: 0
+                }));
+            }
+        }
 
-            // Upcoming Session
-            const upcomingSession = todaySessions
-                .filter(session => session.startTime > currentTime)
-                .sort((a, b) => a.startTime.localeCompare(b.startTime))[0];
-            document.getElementById('upcomingSession').textContent = upcomingSession
-                ? `${sessionTimeTo12Hour(upcomingSession.startTime)} - ${sessionTimeTo12Hour(upcomingSession.endTime)}: ${upcomingSession.subject}`
-                : 'No upcoming sessions today';
-
-            // Today's Mission
-            const currentMission = todayMissions.find(mission => {
-                const [startTime, endTime] = mission.timeBlock.split('-');
-                return currentTime >= startTime && currentTime < endTime && !mission.completed;
+        // Navigation Functions
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
             });
-            document.getElementById('todayMission').textContent = currentMission
-                ? `${sessionTimeTo12Hour(currentMission.timeBlock.split('-')[0])} - ${sessionTimeTo12Hour(currentMission.timeBlock.split('-')[1])}: ${currentMission.subject} - ${currentMission.task} (${currentMission.priority})`
-                : 'No active missions (see Mission Board)';
+            document.getElementById(pageId).classList.add('active');
+            currentPage = pageId;
+            
+            // Update page-specific content
+            if (pageId === 'routine') loadRoutine();
+            if (pageId === 'mission') loadMissions();
+            if (pageId === 'recap') loadNotes();
+            if (pageId === 'progress') loadProgress();
+            
+            // Close mobile menu
+            document.getElementById('mobileMenu').classList.add('hidden');
+        }
 
-            // Gamification
-            const studyData = loadStudyData();
-            const totalMinutes = Object.values(studyData.dailyTotals).reduce((sum, min) => sum + min, 0);
-            const stars = Math.floor(totalMinutes / 60); // 1 star per hour
-            const level = Math.floor(totalMinutes / (5 * 60)); // 1 level per 5 hours
-            document.getElementById('starsEarned').innerHTML = '★'.repeat(stars);
-            document.getElementById('level').textContent = level;
+        function toggleMobileMenu() {
+            document.getElementById('mobileMenu').classList.toggle('hidden');
+        }
 
-            // Missed Session Alert
-            const missedSessions = todaySessions.filter(session =>
-                session.endTime < currentTime && !session.completed
-            );
-            if (missedSessions.length > 0) {
-                alert(`Missed sessions: ${missedSessions.map(s => `${sessionTimeTo12Hour(s.startTime)} ${s.subject}`).join(', ')}`);
-                missedSessions.forEach(session => session.completed = true);
-                saveRoutine(routine);
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode;
+            document.body.classList.toggle('dark-mode', isDarkMode);
+            localStorage.setItem('studyBuddy_darkMode', isDarkMode);
+        }
+
+        // Clock Functions
+        function startClock() {
+            clockInterval = setInterval(updateClock, 1000);
+            updateClock();
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            const dateString = now.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            
+            document.getElementById('liveClock').textContent = timeString;
+            document.getElementById('currentDate').textContent = dateString;
+            
+            // Update current session
+            updateCurrentSession();
+        }
+
+        // Timer Functions
+        function startTimer() {
+            if (!studyTimer.running) {
+                studyTimer.running = true;
+                studyTimer.startTime = Date.now() - studyTimer.elapsed;
+                timerInterval = setInterval(updateTimer, 1000);
             }
         }
 
-        // Stopwatch
-        let stopwatchInterval = null;
-        let stopwatchSeconds = 0;
-        let isPomodoro = false;
-        let pomodoroPhase = 'work';
-        let pomodoroTimeLeft = 25 * 60;
-
-        function updateStopwatch() {
-            const hours = Math.floor(stopwatchSeconds / 3600);
-            const minutes = Math.floor((stopwatchSeconds % 3600) / 60);
-            const seconds = stopwatchSeconds % 60;
-            document.getElementById('stopwatch').textContent =
-                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        function pauseTimer() {
+            if (studyTimer.running) {
+                studyTimer.running = false;
+                clearInterval(timerInterval);
+                const minutes = Math.floor((Date.now() - studyTimer.startTime) / 60000);
+                if (minutes > 0) {
+                    updateStudyProgress(minutes);
+                }
+                studyTimer.elapsed = Date.now() - studyTimer.startTime;
+            }
         }
 
-        function startStopwatch() {
-            if (!stopwatchInterval) {
-                stopwatchInterval = setInterval(() => {
-                    stopwatchSeconds++;
-                    updateStopwatch();
-                    if (isPomodoro) {
-                        pomodoroTimeLeft--;
-                        if (pomodoroTimeLeft <= 0) {
-                            if (pomodoroPhase === 'work') {
-                                pomodoroPhase = 'break';
-                                pomodoroTimeLeft = 5 * 60;
-                                alert('Work session complete! Take a 5-minute break.');
-                            } else {
-                                pomodoroPhase = 'work';
-                                pomodoroTimeLeft = 25 * 60;
-                                const studyData = loadStudyData();
-                                studyData.pomodoroSessions = (studyData.pomodoroSessions || 0) + 1;
-                                saveStudyData(studyData);
-                                alert('Break over! Start next work session.');
+        function resetTimer() {
+            if (studyTimer.running) {
+                pauseTimer();
+            }
+            const minutes = Math.floor(studyTimer.elapsed / 60000);
+            if (minutes > 0) {
+                updateStudyProgress(minutes);
+            }
+            studyTimer.running = false;
+            studyTimer.elapsed = 0;
+            clearInterval(timerInterval);
+            updateTimer();
+        }
+
+        function updateTimer() {
+            if (studyTimer.running) {
+                studyTimer.elapsed = Date.now() - studyTimer.startTime;
+            }
+            
+            const totalSeconds = Math.floor(studyTimer.elapsed / 1000);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            
+            const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            document.getElementById('timerDisplay').textContent = timeString;
+        }
+
+        // Routine Functions
+        function loadRoutine() {
+            const routine = JSON.parse(localStorage.getItem('studyBuddy_routine') || '{}');
+            const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            
+            days.forEach(day => {
+                const daySchedule = document.getElementById(`${day}-schedule`);
+                daySchedule.innerHTML = '';
+                
+                if (routine[day]) {
+                    routine[day].forEach((session, index) => {
+                        const sessionElement = createSessionElement(session, day, index);
+                        daySchedule.appendChild(sessionElement);
+                    });
+                }
+            });
+        }
+
+        function createSessionElement(session, day, index) {
+            const div = document.createElement('div');
+            div.className = `time-block glass-dark rounded-lg p-3 mb-2 subject-${session.subject}`;
+            div.innerHTML = `
+                <div class="text-white text-sm font-semibold">${session.startTime} - ${session.endTime}</div>
+                <div class="text-white/90 text-xs">${session.subject.charAt(0).toUpperCase() + session.subject.slice(1)}</div>
+                <div class="flex justify-end space-x-1 mt-2">
+                    <button onclick="editSession('${day}', ${index})" class="text-white/70 hover:text-white">
+                        <i class="fas fa-edit text-xs"></i>
+                    </button>
+                    <button onclick="deleteSession('${day}', ${index})" class="text-white/70 hover:text-white">
+                        <i class="fas fa-trash text-xs"></i>
+                    </button>
+                </div>
+            `;
+            return div;
+        }
+
+        function showAddRoutineModal() {
+            document.getElementById('addRoutineModal').classList.remove('hidden');
+        }
+
+        function addRoutineSession(day, startTime, endTime, subject) {
+            const routine = JSON.parse(localStorage.getItem('studyBuddy_routine') || '{}');
+            
+            if (!routine[day]) {
+                routine[day] = [];
+            }
+            
+            // Check for conflicts
+            const newSession = { startTime, endTime, subject };
+            if (hasTimeConflict(routine[day], newSession)) {
+                alert('Time conflict detected! Please choose a different time slot.');
+                return false;
+            }
+            
+            routine[day].push(newSession);
+            routine[day].sort((a, b) => a.startTime.localeCompare(b.startTime));
+            
+            localStorage.setItem('studyBuddy_routine', JSON.stringify(routine));
+            loadRoutine();
+            return true;
+        }
+
+        function hasTimeConflict(sessions, newSession) {
+            return sessions.some(session => {
+                return (newSession.startTime < session.endTime && newSession.endTime > session.startTime);
+            });
+        }
+
+        function deleteSession(day, index) {
+            if (confirm('Are you sure you want to delete this session?')) {
+                const routine = JSON.parse(localStorage.getItem('studyBuddy_routine') || '{}');
+                routine[day].splice(index, 1);
+                localStorage.setItem('studyBuddy_routine', JSON.stringify(routine));
+                loadRoutine();
+            }
+        }
+
+        function resetRoutine() {
+            if (confirm('Are you sure you want to reset all routines? This cannot be undone.')) {
+                localStorage.setItem('studyBuddy_routine', JSON.stringify({}));
+                loadRoutine();
+            }
+        }
+
+        function exportRoutineToPDF() {
+            const routine = JSON.parse(localStorage.getItem('studyBuddy_routine') || '{}');
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            
+            // Check if jsPDF is loaded
+            if (typeof window.jsPDF === 'undefined') {
+                alert('PDF export is loading. Please try again in a moment.');
+                return;
+            }
+            
+            const { jsPDF } = window.jsPDF;
+            const doc = new jsPDF();
+            
+            // Title
+            doc.setFontSize(20);
+            doc.setTextColor(102, 126, 234);
+            doc.text('StudyBuddy - Weekly Routine', 20, 30);
+            
+            // Date
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 45);
+            
+            let yPosition = 60;
+            
+            days.forEach((day, index) => {
+                const dayKey = day.toLowerCase();
+                const daySchedule = routine[dayKey] || [];
+                
+                // Day header
+                doc.setFontSize(16);
+                doc.setTextColor(102, 126, 234);
+                doc.text(day, 20, yPosition);
+                yPosition += 10;
+                
+                if (daySchedule.length === 0) {
+                    doc.setFontSize(10);
+                    doc.setTextColor(128, 128, 128);
+                    doc.text('No sessions scheduled', 30, yPosition);
+                    yPosition += 15;
+                } else {
+                    doc.setFontSize(10);
+                    doc.setTextColor(0, 0, 0);
+                    
+                    daySchedule.forEach(session => {
+                        const sessionText = `${session.startTime} - ${session.endTime}: ${session.subject.charAt(0).toUpperCase() + session.subject.slice(1)}`;
+                        doc.text(sessionText, 30, yPosition);
+                        yPosition += 8;
+                    });
+                    yPosition += 5;
+                }
+                
+                // Check if we need a new page
+                if (yPosition > 250) {
+                    doc.addPage();
+                    yPosition = 30;
+                }
+            });
+            
+            // Footer
+            doc.setFontSize(8);
+            doc.setTextColor(128, 128, 128);
+            doc.text('© 2025 Urfa Hasan Fattah. All rights reserved.', 20, 280);
+            
+            // Save the PDF
+            doc.save('StudyBuddy-Weekly-Routine.pdf');
+        }
+
+        function editSession(day, index) {
+            const routine = JSON.parse(localStorage.getItem('studyBuddy_routine') || '{}');
+            const session = routine[day][index];
+            
+            editingSession = { day, index, oldStartTime: session.startTime, oldEndTime: session.endTime, oldSubject: session.subject };
+            
+            document.getElementById('editRoutineDay').value = day;
+            document.getElementById('editRoutineStartTime').value = session.startTime;
+            document.getElementById('editRoutineEndTime').value = session.endTime;
+            document.getElementById('editRoutineSubject').value = session.subject;
+            
+            document.getElementById('editSessionModal').classList.remove('hidden');
+        }
+
+        // Mission Functions
+        function loadMissions() {
+            const missions = JSON.parse(localStorage.getItem('studyBuddy_missions') || '[]');
+            const today = new Date().toDateString();
+            const todayMissions = missions.filter(mission => mission.date === today);
+            
+            const missionList = document.getElementById('missionList');
+            missionList.innerHTML = '';
+            
+            if (todayMissions.length === 0) {
+                missionList.innerHTML = `
+                    <div class="glass rounded-2xl p-8 text-center">
+                        <i class="fas fa-tasks text-4xl text-white/50 mb-4"></i>
+                        <p class="text-white/80">No missions for today. Add some study goals!</p>
+                    </div>
+                `;
+            } else {
+                todayMissions.forEach((mission, index) => {
+                    const missionElement = createMissionElement(mission, index);
+                    missionList.appendChild(missionElement);
+                });
+            }
+            
+            updateMissionProgress();
+        }
+
+        function createMissionElement(mission, index) {
+            const div = document.createElement('div');
+            div.className = `mission-item glass rounded-2xl p-4 ${mission.completed ? 'completed' : ''}`;
+            
+            const priorityColors = {
+                high: 'text-red-400',
+                medium: 'text-yellow-400',
+                low: 'text-green-400'
+            };
+            
+            div.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <button onclick="toggleMission(${index})" class="text-2xl ${mission.completed ? 'text-green-400' : 'text-white/50'}">
+                            <i class="fas ${mission.completed ? 'fa-check-circle' : 'fa-circle'}"></i>
+                        </button>
+                        <div>
+                            <h4 class="text-white font-semibold ${mission.completed ? 'line-through' : ''}">${mission.title}</h4>
+                            <div class="flex items-center space-x-2 text-sm">
+                                <span class="subject-${mission.subject} px-2 py-1 rounded text-white text-xs">${mission.subject}</span>
+                                <span class="${priorityColors[mission.priority]} text-xs">
+                                    <i class="fas fa-flag"></i> ${mission.priority}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="editMission(${index})" class="text-white/70 hover:text-white">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteMission(${index})" class="text-white/70 hover:text-white">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            return div;
+        }
+
+        function showAddMissionModal() {
+            if (editingMissionIndex === null) {
+                document.getElementById('missionForm').reset();
+            }
+            document.getElementById('addMissionModal').classList.remove('hidden');
+        }
+
+        function addMission(title, subject, priority) {
+            const missions = JSON.parse(localStorage.getItem('studyBuddy_missions') || '[]');
+            const newMission = {
+                id: Date.now(),
+                title,
+                subject,
+                priority,
+                completed: false,
+                date: new Date().toDateString(),
+                createdAt: new Date().toISOString()
+            };
+            
+            missions.push(newMission);
+            localStorage.setItem('studyBuddy_missions', JSON.stringify(missions));
+            loadMissions();
+        }
+
+        function editMission(index) {
+            const missions = JSON.parse(localStorage.getItem('studyBuddy_missions') || '[]');
+            const today = new Date().toDateString();
+            const todayMissions = missions.filter(mission => mission.date === today);
+            const mission = todayMissions[index];
+            
+            document.getElementById('missionTitle').value = mission.title;
+            document.getElementById('missionSubject').value = mission.subject;
+            document.getElementById('missionPriority').value = mission.priority;
+            editingMissionIndex = index;
+            showAddMissionModal();
+        }
+
+        function toggleMission(index) {
+            const missions = JSON.parse(localStorage.getItem('studyBuddy_missions') || '[]');
+            const today = new Date().toDateString();
+            const todayMissions = missions.filter(mission => mission.date === today);
+            
+            if (todayMissions[index]) {
+                const missionId = todayMissions[index].id;
+                const missionIndex = missions.findIndex(m => m.id === missionId);
+                missions[missionIndex].completed = !missions[missionIndex].completed;
+                
+                localStorage.setItem('studyBuddy_missions', JSON.stringify(missions));
+                loadMissions();
+                updateDashboard();
+            }
+        }
+
+        function deleteMission(index) {
+            if (confirm('Are you sure you want to delete this mission?')) {
+                const missions = JSON.parse(localStorage.getItem('studyBuddy_missions') || '[]');
+                const today = new Date().toDateString();
+                const todayMissions = missions.filter(mission => mission.date === today);
+                
+                if (todayMissions[index]) {
+                    const missionId = todayMissions[index].id;
+                    const missionIndex = missions.findIndex(m => m.id === missionId);
+                    missions.splice(missionIndex, 1);
+                    
+                    localStorage.setItem('studyBuddy_missions', JSON.stringify(missions));
+                    loadMissions();
+                    updateDashboard();
+                }
+            }
+        }
+
+        function updateMissionProgress() {
+            const missions = JSON.parse(localStorage.getItem('studyBuddy_missions') || '[]');
+            const today = new Date().toDateString();
+            const todayMissions = missions.filter(mission => mission.date === today);
+            
+            const completed = todayMissions.filter(mission => mission.completed).length;
+            const total = todayMissions.length;
+            const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+            
+            document.getElementById('missionProgress').textContent = `${percentage}%`;
+            document.getElementById('missionProgressBar').style.width = `${percentage}%`;
+            
+            // Update routine mission count
+            const routineMissions = todayMissions.filter(mission => mission.isRoutineBased);
+            document.getElementById('routineMissionCount').textContent = `${routineMissions.length} generated`;
+        }
+
+        function generateRoutineMissions() {
+            const now = new Date();
+            const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            const currentDay = days[now.getDay()];
+            const today = now.toDateString();
+            
+            const routine = JSON.parse(localStorage.getItem('studyBuddy_routine') || '{}');
+            const todaySchedule = routine[currentDay] || [];
+            
+            if (todaySchedule.length === 0) {
+                alert('No routine sessions found for today. Please add some sessions first.');
+                return;
+            }
+            
+            const missions = JSON.parse(localStorage.getItem('studyBuddy_missions') || '[]');
+            
+            // Remove existing routine-based missions for today
+            const filteredMissions = missions.filter(mission => 
+                !(mission.date === today && mission.isRoutineBased)
+            );
+            
+            // Generate new missions based on routine
+            const missionTemplates = {
+                biology: ['Review cell structure', 'Study photosynthesis', 'Practice genetics problems', 'Learn anatomy'],
+                chemistry: ['Balance chemical equations', 'Study periodic table', 'Practice stoichiometry', 'Review organic compounds'],
+                physics: ['Solve mechanics problems', 'Study wave properties', 'Practice thermodynamics', 'Review electricity'],
+                math: ['Solve calculus problems', 'Practice algebra', 'Study geometry theorems', 'Review statistics'],
+                english: ['Read literature', 'Practice essay writing', 'Study grammar rules', 'Analyze poetry'],
+                other: ['Review notes', 'Complete assignments', 'Practice problems', 'Study concepts']
+            };
+            
+            todaySchedule.forEach(session => {
+                const templates = missionTemplates[session.subject] || missionTemplates.other;
+                const randomTemplate = templates[Math.floor(Math.random() * templates.length)];
+                
+                const newMission = {
+                    id: Date.now() + Math.random(),
+                    title: `${session.startTime}-${session.endTime}: ${randomTemplate}`,
+                    subject: session.subject,
+                    priority: 'medium',
+                    completed: false,
+                    date: today,
+                    isRoutineBased: true,
+                    sessionTime: `${session.startTime}-${session.endTime}`,
+                    createdAt: new Date().toISOString()
+                };
+                
+                filteredMissions.push(newMission);
+            });
+            
+            localStorage.setItem('studyBuddy_missions', JSON.stringify(filteredMissions));
+            loadMissions();
+            
+            alert(`Generated ${todaySchedule.length} missions based on your routine!`);
+        }
+
+        // Notes Functions
+        function loadNotes() {
+            const notes = JSON.parse(localStorage.getItem('studyBuddy_notes') || '[]');
+            const notesList = document.getElementById('notesList');
+            notesList.innerHTML = '';
+            
+            if (notes.length === 0) {
+                notesList.innerHTML = `
+                    <div class="col-span-full glass rounded-2xl p-8 text-center">
+                        <i class="fas fa-sticky-note text-4xl text-white/50 mb-4"></i>
+                        <p class="text-white/80">No notes yet. Start adding your study notes!</p>
+                    </div>
+                `;
+            } else {
+                // Sort notes: pinned first, then by date
+                notes.sort((a, b) => {
+                    if (a.pinned && !b.pinned) return -1;
+                    if (!a.pinned && b.pinned) return 1;
+                    return new Date(b.createdAt) - new Date(a.createdAt);
+                });
+                
+                notes.forEach((note, index) => {
+                    const noteElement = createNoteElement(note, index);
+                    notesList.appendChild(noteElement);
+                });
+            }
+        }
+
+        function createNoteElement(note, index) {
+            const div = document.createElement('div');
+            div.className = `glass rounded-2xl p-4 ${note.pinned ? 'ring-2 ring-yellow-400' : ''}`;
+            
+            const isImage = note.type === 'image';
+            
+            div.innerHTML = `
+                <div class="flex justify-between items-start mb-3">
+                    <div class="flex items-center space-x-2">
+                        <span class="subject-${note.subject} px-2 py-1 rounded text-white text-xs">${note.subject}</span>
+                        ${isImage ? '<i class="fas fa-image text-purple-400"></i>' : '<i class="fas fa-sticky-note text-blue-400"></i>'}
+                        ${note.pinned ? '<i class="fas fa-thumbtack text-yellow-400"></i>' : ''}
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="editNote(${index})" class="text-white/70 hover:text-white">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteNote(${index})" class="text-white/70 hover:text-white">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <h4 class="text-white font-semibold mb-2">${note.title}</h4>
+                ${isImage ? `
+                    <div class="mb-3">
+                        <img src="${note.imageData}" alt="${note.title}" class="w-full h-32 object-cover rounded-lg cursor-pointer" onclick="viewImageFullscreen('${note.imageData}', '${note.title}')">
+                    </div>
+                ` : ''}
+                <p class="text-white/80 text-sm mb-3 line-clamp-3">${note.content}</p>
+                ${note.tags ? `<div class="flex flex-wrap gap-1 mb-2">
+                    ${note.tags.split(',').map(tag => `<span class="bg-white/20 text-white text-xs px-2 py-1 rounded">${tag.trim()}</span>`).join('')}
+                </div>` : ''}
+                <div class="text-white/60 text-xs">
+                    ${new Date(note.createdAt).toLocaleDateString()}
+                </div>
+            `;
+            
+            return div;
+        }
+
+        function viewImageFullscreen(imageData, title) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+            modal.onclick = () => modal.remove();
+            
+            modal.innerHTML = `
+                <div class="max-w-4xl max-h-full">
+                    <div class="text-white text-center mb-4">
+                        <h3 class="text-xl font-semibold">${title}</h3>
+                        <p class="text-white/60 text-sm">Click anywhere to close</p>
+                    </div>
+                    <img src="${imageData}" alt="${title}" class="max-w-full max-h-full object-contain rounded-lg">
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+
+        function showAddNoteModal() {
+            if (editingNoteIndex === null) {
+                document.getElementById('noteForm').reset();
+            }
+            document.getElementById('addNoteModal').classList.remove('hidden');
+        }
+
+        function addNote(title, subject, content, tags, pinned) {
+            const notes = JSON.parse(localStorage.getItem('studyBuddy_notes') || '[]');
+            const newNote = {
+                id: Date.now(),
+                title,
+                subject,
+                content,
+                tags,
+                pinned,
+                createdAt: new Date().toISOString()
+            };
+            
+            notes.push(newNote);
+            localStorage.setItem('studyBuddy_notes', JSON.stringify(notes));
+            loadNotes();
+        }
+
+        function deleteNote(index) {
+            if (confirm('Are you sure you want to delete this note?')) {
+                const notes = JSON.parse(localStorage.getItem('studyBuddy_notes') || '[]');
+                notes.splice(index, 1);
+                localStorage.setItem('studyBuddy_notes', JSON.stringify(notes));
+                loadNotes();
+            }
+        }
+
+        function toggleFlashcardMode() {
+            alert('Flashcard mode coming soon!');
+        }
+
+        function showAddImageModal() {
+            if (editingNoteIndex === null) {
+                document.getElementById('imageForm').reset();
+                currentImageData = null;
+                document.getElementById('imagePreview').classList.add('hidden');
+                document.getElementById('uploadPrompt').classList.remove('hidden');
+            }
+            document.getElementById('addImageModal').classList.remove('hidden');
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            // Check file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Image size should be less than 5MB');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                currentImageData = e.target.result;
+                
+                // Show preview
+                document.getElementById('previewImg').src = currentImageData;
+                document.getElementById('imageInfo').textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+                document.getElementById('imagePreview').classList.remove('hidden');
+                document.getElementById('uploadPrompt').classList.add('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function addImage(title, subject, description, tags, pinned) {
+            if (!currentImageData) {
+                alert('Please select an image first');
+                return;
+            }
+            
+            const notes = JSON.parse(localStorage.getItem('studyBuddy_notes') || '[]');
+            const newImage = {
+                id: Date.now(),
+                title,
+                subject,
+                content: description || 'Image note',
+                tags,
+                pinned,
+                type: 'image',
+                imageData: currentImageData,
+                createdAt: new Date().toISOString()
+            };
+            
+            notes.push(newImage);
+            localStorage.setItem('studyBuddy_notes', JSON.stringify(notes));
+            loadNotes();
+            
+            // Reset form
+            currentImageData = null;
+            document.getElementById('imagePreview').classList.add('hidden');
+            document.getElementById('uploadPrompt').classList.remove('hidden');
+        }
+
+        function editNote(index) {
+            const notes = JSON.parse(localStorage.getItem('studyBuddy_notes') || '[]');
+            const note = notes[index];
+            editingNoteIndex = index;
+            
+            if (note.type === 'image') {
+                document.getElementById('imageTitle').value = note.title;
+                document.getElementById('imageSubject').value = note.subject;
+                document.getElementById('imageDescription').value = note.content;
+                document.getElementById('imageTags').value = note.tags || '';
+                document.getElementById('imagePinned').checked = note.pinned;
+                currentImageData = note.imageData;
+                document.getElementById('previewImg').src = currentImageData;
+                document.getElementById('imageInfo').textContent = 'Existing image';
+                document.getElementById('imagePreview').classList.remove('hidden');
+                document.getElementById('uploadPrompt').classList.add('hidden');
+                showAddImageModal();
+            } else {
+                document.getElementById('noteTitle').value = note.title;
+                document.getElementById('noteSubject').value = note.subject;
+                document.getElementById('noteContent').value = note.content;
+                document.getElementById('noteTags').value = note.tags || '';
+                document.getElementById('notePinned').checked = note.pinned;
+                showAddNoteModal();
+            }
+        }
+
+        // Progress Functions
+        function loadProgress() {
+            const progress = JSON.parse(localStorage.getItem('studyBuddy_progress') || '{}');
+            
+            // Update level display
+            const level = Math.floor((progress.totalStudyTime || 0) / 300) + 1; // 5 hours per level
+            const currentLevelProgress = (progress.totalStudyTime || 0) - ((level - 1) * 300);
+            const levelPercent = (currentLevelProgress / 300) * 100;
+            
+            // Update level icon based on level
+            const levelIcons = ['⭐', '🌟', '✨', '💫', '🏆', '👑', '🎖️', '🏅', '🎯', '🚀'];
+            const levelIcon = levelIcons[Math.min(level - 1, levelIcons.length - 1)];
+            
+            document.getElementById('levelIcon').textContent = levelIcon;
+            document.getElementById('studyLevel').textContent = `Level ${level}`;
+            document.getElementById('levelProgress').textContent = `${Math.floor(currentLevelProgress / 60)}/${300 / 60} hours to next level`;
+            document.getElementById('levelProgressBar').style.width = `${levelPercent}%`;
+            
+            // Update total study time and rank
+            const hours = Math.floor((progress.totalStudyTime || 0) / 60);
+            const minutes = (progress.totalStudyTime || 0) % 60;
+            document.getElementById('totalStudyTime').textContent = `${hours}h ${minutes}m`;
+            
+            const ranks = ['Beginner', 'Student', 'Scholar', 'Expert', 'Master', 'Genius'];
+            const rankIndex = Math.min(Math.floor(level / 5), ranks.length - 1);
+            document.getElementById('studyRank').textContent = ranks[rankIndex];
+            
+            // Update weekly goal
+            const weeklyTarget = 25 * 60; // 25 hours in minutes
+            const thisWeek = getCurrentWeekStudyTime(progress);
+            const weeklyPercent = Math.min(Math.round((thisWeek / weeklyTarget) * 100), 100);
+            
+            document.getElementById('weeklyGoalPercent').textContent = `${weeklyPercent}%`;
+            updateCircularProgress('weeklyGoalCircle', weeklyPercent);
+            
+            // Update streak
+            const currentStreak = progress.streak || 0;
+            const bestStreak = progress.bestStreak || 0;
+            document.getElementById('studyStreak').textContent = currentStreak;
+            document.getElementById('bestStreak').textContent = `Best: ${bestStreak}`;
+            
+            // Update productivity score
+            const productivityScore = calculateProductivityScore(progress);
+            document.getElementById('productivityScore').textContent = `${productivityScore}%`;
+            
+            // Load achievements
+            loadAchievements(progress);
+            
+            // Load insights and recommendations
+            loadInsights(progress);
+            loadRecommendations(progress);
+            
+            // Load charts
+            loadCharts(progress);
+        }
+
+        function calculateProductivityScore(progress) {
+            const thisWeek = getCurrentWeekStudyTime(progress);
+            const weeklyTarget = 25 * 60; // 25 hours
+            const missions = JSON.parse(localStorage.getItem('studyBuddy_missions') || '[]');
+            
+            // Get this week's missions
+            const now = new Date();
+            const weekStart = new Date(now.setDate(now.getDate() - now.getDay()));
+            weekStart.setHours(0, 0, 0, 0);
+            
+            let weeklyMissions = 0;
+            let completedMissions = 0;
+            
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(weekStart);
+                date.setDate(weekStart.getDate() + i);
+                const dateString = date.toDateString();
+                
+                const dayMissions = missions.filter(m => m.date === dateString);
+                weeklyMissions += dayMissions.length;
+                completedMissions += dayMissions.filter(m => m.completed).length;
+            }
+            
+            const timeScore = Math.min((thisWeek / weeklyTarget) * 50, 50);
+            const missionScore = weeklyMissions > 0 ? (completedMissions / weeklyMissions) * 50 : 0;
+            
+            return Math.round(timeScore + missionScore);
+        }
+
+        function loadAchievements(progress) {
+            const achievements = [];
+            const level = Math.floor((progress.totalStudyTime || 0) / 300) + 1;
+            const streak = progress.streak || 0;
+            const totalHours = Math.floor((progress.totalStudyTime || 0) / 60);
+            
+            // Level achievements
+            if (level >= 5) achievements.push({ icon: '🌟', title: 'Rising Star', desc: 'Reached Level 5' });
+            if (level >= 10) achievements.push({ icon: '🏆', title: 'Champion', desc: 'Reached Level 10' });
+            
+            // Time achievements
+            if (totalHours >= 10) achievements.push({ icon: '⏰', title: 'Time Master', desc: '10+ hours studied' });
+            if (totalHours >= 50) achievements.push({ icon: '📚', title: 'Bookworm', desc: '50+ hours studied' });
+            if (totalHours >= 100) achievements.push({ icon: '🎓', title: 'Scholar', desc: '100+ hours studied' });
+            
+            // Streak achievements
+            if (streak >= 3) achievements.push({ icon: '🔥', title: 'On Fire', desc: '3-day streak' });
+            if (streak >= 7) achievements.push({ icon: '💪', title: 'Dedicated', desc: '7-day streak' });
+            if (streak >= 30) achievements.push({ icon: '👑', title: 'Legendary', desc: '30-day streak' });
+            
+            const achievementsList = document.getElementById('achievementsList');
+            if (achievements.length === 0) {
+                achievementsList.innerHTML = '<p class="text-white/60 text-sm">Complete your first study session to earn achievements!</p>';
+            } else {
+                achievementsList.innerHTML = achievements.slice(-5).map(achievement => `
+                    <div class="glass-dark rounded-lg p-3 text-center min-w-[120px]">
+                        <div class="text-2xl mb-1">${achievement.icon}</div>
+                        <div class="text-white text-xs font-semibold">${achievement.title}</div>
+                        <div class="text-white/60 text-xs">${achievement.desc}</div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function loadInsights(progress) {
+            const insights = [];
+            const thisWeek = getCurrentWeekStudyTime(progress);
+            const lastWeek = getLastWeekStudyTime(progress);
+            const totalHours = Math.floor((progress.totalStudyTime || 0) / 60);
+            
+            // Weekly comparison
+            if (lastWeek > 0) {
+                const change = ((thisWeek - lastWeek) / lastWeek) * 100;
+                if (change > 10) {
+                    insights.push(`📈 Great improvement! You studied ${Math.round(change)}% more than last week.`);
+                } else if (change < -10) {
+                    insights.push(`📉 Study time decreased by ${Math.round(Math.abs(change))}% from last week.`);
+                } else {
+                    insights.push(`📊 Consistent performance! Similar study time as last week.`);
+                }
+            }
+            
+            // Subject analysis
+            const subjectTime = progress.subjectTime || {};
+            const topSubject = Object.keys(subjectTime).reduce((a, b) => 
+                (subjectTime[a] || 0) > (subjectTime[b] || 0) ? a : b, 'none');
+            
+            if (topSubject !== 'none') {
+                const topSubjectHours = Math.floor((subjectTime[topSubject] || 0) / 60);
+                insights.push(`🎯 Your focus subject is ${topSubject} with ${topSubjectHours} hours studied.`);
+            }
+            
+            // Streak insight
+            const streak = progress.streak || 0;
+            if (streak >= 7) {
+                insights.push(`🔥 Amazing ${streak}-day streak! Keep the momentum going.`);
+            } else if (streak >= 3) {
+                insights.push(`💪 Good ${streak}-day streak! Try to reach a week.`);
+            }
+            
+            const insightsDiv = document.getElementById('studyInsights');
+            insightsDiv.innerHTML = insights.length > 0 ? 
+                insights.map(insight => `<div class="text-white/80 text-sm p-2 glass-dark rounded">${insight}</div>`).join('') :
+                '<div class="text-white/60 text-sm">Study more to get personalized insights!</div>';
+        }
+
+        function loadRecommendations(progress) {
+            const recommendations = [];
+            const thisWeek = getCurrentWeekStudyTime(progress);
+            const weeklyTarget = 25 * 60;
+            const streak = progress.streak || 0;
+            
+            // Time-based recommendations
+            if (thisWeek < weeklyTarget * 0.5) {
+                recommendations.push('⏰ Try to study at least 2 hours daily to reach your weekly goal.');
+            }
+            
+            if (streak === 0) {
+                recommendations.push('🎯 Start a study streak! Even 30 minutes daily makes a difference.');
+            } else if (streak < 7) {
+                recommendations.push('🔥 You\'re building a great habit! Try to reach a 7-day streak.');
+            }
+            
+            // Subject balance
+            const subjectTime = progress.subjectTime || {};
+            const subjects = Object.keys(subjectTime);
+            if (subjects.length > 1) {
+                const totalTime = Object.values(subjectTime).reduce((a, b) => a + b, 0);
+                const imbalanced = subjects.find(subject => 
+                    (subjectTime[subject] / totalTime) > 0.6
+                );
+                if (imbalanced) {
+                    recommendations.push(`📚 Consider balancing your study time. ${imbalanced} takes up most of your time.`);
+                }
+            }
+            
+            // General recommendations
+            recommendations.push('💡 Take regular breaks using the Pomodoro technique.');
+            recommendations.push('📝 Review your notes regularly for better retention.');
+            
+            const recommendationsDiv = document.getElementById('recommendations');
+            recommendationsDiv.innerHTML = recommendations.slice(0, 4).map(rec => 
+                `<div class="text-white/80 text-sm p-2 glass-dark rounded">${rec}</div>`
+            ).join('');
+        }
+
+        function getLastWeekStudyTime(progress) {
+            const now = new Date();
+            const lastWeekStart = new Date(now.setDate(now.getDate() - now.getDay() - 7));
+            lastWeekStart.setHours(0, 0, 0, 0);
+            
+            let lastWeekTime = 0;
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(lastWeekStart);
+                date.setDate(lastWeekStart.getDate() + i);
+                const dateString = date.toDateString();
+                lastWeekTime += progress.dailyStudyTime[dateString] || 0;
+            }
+            
+            return lastWeekTime;
+        }
+
+        function getCurrentWeekStudyTime(progress) {
+            const now = new Date();
+            const weekStart = new Date(now.setDate(now.getDate() - now.getDay()));
+            weekStart.setHours(0, 0, 0, 0);
+            
+            let weeklyTime = 0;
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(weekStart);
+                date.setDate(weekStart.getDate() + i);
+                const dateString = date.toDateString();
+                weeklyTime += progress.dailyStudyTime[dateString] || 0;
+            }
+            
+            return weeklyTime;
+        }
+
+        function updateCircularProgress(elementId, percentage) {
+            const circle = document.getElementById(elementId);
+            const radius = circle.r.baseVal.value;
+            const circumference = radius * 2 * Math.PI;
+            const offset = circumference - (percentage / 100) * circumference;
+            
+            circle.style.strokeDasharray = `${circumference} ${circumference}`;
+            circle.style.strokeDashoffset = offset;
+        }
+
+        function loadCharts(progress) {
+            // Clear existing charts
+            Chart.getChart('studyTimeChart')?.destroy();
+            Chart.getChart('subjectChart')?.destroy();
+            Chart.getChart('trendsChart')?.destroy();
+            
+            // Study Time Chart
+            const ctx1 = document.getElementById('studyTimeChart').getContext('2d');
+            const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const weekData = weekDays.map((day, index) => {
+                const date = new Date();
+                date.setDate(date.getDate() - date.getDay() + index);
+                const dateString = date.toDateString();
+                return Math.floor((progress.dailyStudyTime?.[dateString] || 0) / 60);
+            });
+            
+            new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: weekDays,
+                    datasets: [{
+                        label: 'Study Hours',
+                        data: weekData,
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#667eea',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            labels: { color: 'white' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: 'white' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        },
+                        x: {
+                            ticks: { color: 'white' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        }
+                    }
+                }
+            });
+            
+            // Subject Distribution Chart
+            const ctx2 = document.getElementById('subjectChart').getContext('2d');
+            const subjectTime = progress.subjectTime || {};
+            const subjects = Object.keys(subjectTime);
+            const subjectData = subjects.map(subject => Math.floor((subjectTime[subject] || 0) / 60));
+            
+            if (subjects.length > 0) {
+                new Chart(ctx2, {
+                    type: 'doughnut',
+                    data: {
+                        labels: subjects.map(s => s.charAt(0).toUpperCase() + s.slice(1)),
+                        datasets: [{
+                            data: subjectData,
+                            backgroundColor: [
+                                '#4facfe', '#43e97b', '#fa709a', '#a8edea', '#ffecd2', '#667eea'
+                            ],
+                            borderWidth: 2,
+                            borderColor: 'rgba(255,255,255,0.2)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                labels: { color: 'white' },
+                                position: 'bottom'
                             }
                         }
                     }
-                }, 1000);
+                });
+            } else {
+                ctx2.fillStyle = 'rgba(255,255,255,0.5)';
+                ctx2.font = '14px Inter';
+                ctx2.textAlign = 'center';
+                ctx2.fillText('No data yet', ctx2.canvas.width/2, ctx2.canvas.height/2);
             }
-        }
-
-        function pauseStopwatch() {
-            clearInterval(stopwatchInterval);
-            stopwatchInterval = null;
-            if (!isPomodoro) {
-                updateDailyTotal();
-            }
-        }
-
-        function resetStopwatch() {
-            clearInterval(stopwatchInterval);
-            stopwatchInterval = null;
-            stopwatchSeconds = 0;
-            isPomodoro = false;
-            pomodoroPhase = 'work';
-            pomodoroTimeLeft = 25 * 60;
-            updateStopwatch();
-            updateDailyTotal();
-        }
-
-        function startPomodoro() {
-            if (!stopwatchInterval) {
-                isPomodoro = true;
-                pomodoroPhase = 'work';
-                pomodoroTimeLeft = 25 * 60;
-                startStopwatch();
-            }
-        }
-
-        function updateDailyTotal() {
-            const studyData = loadStudyData();
-            const today = new Date().toISOString().split('T')[0];
-            studyData.dailyTotals[today] = (studyData.dailyTotals[today] || 0) + Math.floor(stopwatchSeconds / 60);
-            saveStudyData(studyData);
-            document.getElementById('dailyTotal').textContent = `${studyData.dailyTotals[today] || 0} minutes`;
-        }
-
-        // Motivational Quote
-        const quotes = [
-            "The future belongs to those who prepare for it today. – Malcolm X",
-            "Success is the sum of small efforts, repeated day in and day out. – Robert Collier",
-            "You don’t have to be great to start, but you have to start to be great. – Zig Ziglar",
-            "The only way to do great work is to love what you do. – Steve Jobs"
-        ];
-
-        function updateQuote() {
-            const quoteIndex = Math.floor(new Date().getDate() % quotes.length);
-            document.getElementById('motivationalQuote').textContent = quotes[quoteIndex];
-        }
-
-        // Chatbot
-        const chatbotResponses = {
-            'stopwatch': 'The stopwatch tracks your study time. Click "Start" to begin, "Pause" to stop, or "Reset" to clear. Use "Start Pomodoro" for a 25-minute focused session with a 5-minute break!',
-            'pomodoro': 'Pomodoro mode runs a 25-minute work session followed by a 5-minute break. It’s great for focus! Start it from the stopwatch card.',
-            'missions': 'Check the Mission Board to set daily tasks. The "Today’s Mission" card shows your current task. Complete missions to boost your progress!',
-            'notes': 'Use the Exam Recap page to create quick notes and study with flashcards or slides. Perfect for last-minute reviews!',
-            'stars': 'You earn 1 star for every hour of study time tracked via the stopwatch or Pomodoro. Check your stars and level in the Gamification card!',
-            'level': 'You gain 1 level for every 5 hours of study time. Keep studying to level up and track your progress!',
-            'routine': 'The Routine page lets you schedule study sessions. They appear here as Current or Upcoming Sessions.',
-            'progress': 'The Progress page shows your study stats with charts and reports. Track your daily and monthly goals there!',
-            'hi': 'Hello! Welcome to StudyBuddy. I’m here to guide you. Try the suggestions below or ask me anything!'
-        };
-
-        function toggleChatbot() {
-            const panel = document.getElementById('chatbotPanel');
-            const toggle = document.getElementById('chatbotToggle');
-            panel.classList.toggle('open');
-            toggle.classList.toggle('open');
-            if (panel.classList.contains('open')) {
-                document.getElementById('chatbotInput').focus();
-            }
-        }
-
-        function closeChatbot() {
-            const panel = document.getElementById('chatbotPanel');
-            const toggle = document.getElementById('chatbotToggle');
-            panel.classList.remove('open');
-            toggle.classList.remove('open');
-        }
-
-        function clearChat() {
-            const messages = document.getElementById('chatbotMessages');
-            messages.innerHTML = `
-                <div class="chatbot-message">
-                    Welcome to StudyBuddy! I'm here to help. Earn <b>1 star per study hour</b> and <b>1 level per 5 hours</b>. Try the suggestions below or ask me anything!
-                </div>
-            `;
-            messages.scrollTop = messages.scrollHeight;
-        }
-
-        function addChatMessage(message, isUser = false) {
-            const messages = document.getElementById('chatbotMessages');
-            const div = document.createElement('div');
-            div.className = `chatbot-message ${isUser ? 'user' : ''}`;
-            div.textContent = message;
-            messages.appendChild(div);
-            messages.scrollTop = messages.scrollHeight;
-        }
-
-        function sendSuggestion(query) {
-            const input = document.getElementById('chatbotInput');
-            input.value = query;
-            const event = new Event('submit');
-            document.getElementById('chatbotForm').dispatchEvent(event);
-        }
-
-        document.getElementById('chatbotForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const input = document.getElementById('chatbotInput');
-            const query = input.value.trim().toLowerCase();
-            if (!query) return;
-
-            addChatMessage(query, true);
-            const response = chatbotResponses[query] || 'Sorry, I didn’t understand that. Try the suggestions below or ask about "stopwatch", "missions", or "stars"!';
-            setTimeout(() => addChatMessage(response), 500); // Simulate typing delay
-            input.value = '';
-        });
-
-        // Click Outside to Close
-        document.addEventListener('click', (e) => {
-            const panel = document.getElementById('chatbotPanel');
-            const toggle = document.getElementById('chatbotToggle');
-            if (panel.classList.contains('open') && !panel.contains(e.target) && !toggle.contains(e.target)) {
-                closeChatbot();
-            }
-        });
-
-        // Tooltips for Guidance
-        document.querySelectorAll('[data-tooltip]').forEach(element => {
-            element.addEventListener('mouseenter', () => {
-                if (!document.getElementById('chatbotPanel').classList.contains('open')) {
-                    addChatMessage(element.dataset.tooltip);
-                    document.getElementById('chatbotPanel').classList.add('open');
-                    document.getElementById('chatbotToggle').classList.add('open');
+            
+            // Monthly Trends Chart
+            const ctx3 = document.getElementById('trendsChart').getContext('2d');
+            const monthlyData = getMonthlyTrends(progress);
+            
+            new Chart(ctx3, {
+                type: 'bar',
+                data: {
+                    labels: monthlyData.labels,
+                    datasets: [{
+                        label: 'Hours Studied',
+                        data: monthlyData.data,
+                        backgroundColor: 'rgba(102, 126, 234, 0.6)',
+                        borderColor: '#667eea',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            labels: { color: 'white' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: 'white' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        },
+                        x: {
+                            ticks: { color: 'white' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        }
+                    }
                 }
             });
-        });
-
-        // Initialize
-        function initialize() {
-            updateLiveTime();
-            updateSessions();
-            updateQuote();
-            const studyData = loadStudyData();
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('dailyTotal').textContent = `${studyData.dailyTotals[today] || 0} minutes`;
-            setInterval(updateLiveTime, 1000);
-            setInterval(updateSessions, 1000); // Update every second for timer
         }
 
-        initialize();
+        function getMonthlyTrends(progress) {
+            const now = new Date();
+            const labels = [];
+            const data = [];
+            
+            // Get last 4 weeks
+            for (let i = 3; i >= 0; i--) {
+                const weekStart = new Date(now);
+                weekStart.setDate(now.getDate() - now.getDay() - (i * 7));
+                weekStart.setHours(0, 0, 0, 0);
+                
+                let weekTotal = 0;
+                for (let j = 0; j < 7; j++) {
+                    const date = new Date(weekStart);
+                    date.setDate(weekStart.getDate() + j);
+                    const dateString = date.toDateString();
+                    weekTotal += progress.dailyStudyTime?.[dateString] || 0;
+                }
+                
+                const weekLabel = `Week ${4-i}`;
+                labels.push(weekLabel);
+                data.push(Math.floor(weekTotal / 60));
+            }
+            
+            return { labels, data };
+        }
+
+        // Dashboard Functions
+        function updateDashboard() {
+            updateCurrentSession();
+            updateTodayProgress();
+            updateNextSession();
+        }
+
+        function updateCurrentSession() {
+            const now = new Date();
+            const currentTime = now.toTimeString().slice(0, 5);
+            const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            const currentDay = days[now.getDay()];
+            
+            const routine = JSON.parse(localStorage.getItem('studyBuddy_routine') || '{}');
+            const todaySchedule = routine[currentDay] || [];
+            
+            const currentSession = todaySchedule.find(session => {
+                return currentTime >= session.startTime && currentTime < session.endTime;
+            });
+            
+            const sessionDiv = document.getElementById('currentSession');
+            
+            if (currentSession) {
+                const timeLeft = calculateTimeLeft(currentSession.endTime, currentTime);
+                sessionDiv.innerHTML = `
+                    <div class="text-center">
+                        <div class="subject-${currentSession.subject} rounded-lg p-3 mb-2">
+                            <div class="text-white font-semibold">${currentSession.subject.charAt(0).toUpperCase() + currentSession.subject.slice(1)}</div>
+                        </div>
+                        <div class="text-white/80 text-sm">${currentSession.startTime} - ${currentSession.endTime}</div>
+                        <div class="text-green-400 text-sm mt-1">
+                            <i class="fas fa-play-circle mr-1 pulse"></i>Active Now
+                        </div>
+                        <div class="text-yellow-400 text-xs mt-1">
+                            <i class="fas fa-hourglass-half mr-1"></i>${timeLeft} remaining
+                        </div>
+                    </div>
+                `;
+            } else {
+                sessionDiv.innerHTML = `
+                    <div class="text-center py-4">
+                        <i class="fas fa-clock text-4xl text-white/50 mb-2"></i>
+                        <p class="text-white/80">No active session</p>
+                    </div>
+                `;
+            }
+        }
+
+        function calculateTimeLeft(endTime, currentTime) {
+            const [endHour, endMin] = endTime.split(':').map(Number);
+            const [currentHour, currentMin] = currentTime.split(':').map(Number);
+            
+            const endMinutes = endHour * 60 + endMin;
+            const currentMinutes = currentHour * 60 + currentMin;
+            const diffMinutes = endMinutes - currentMinutes;
+            
+            if (diffMinutes <= 0) return '0m';
+            
+            const hours = Math.floor(diffMinutes / 60);
+            const minutes = diffMinutes % 60;
+            
+            if (hours > 0) {
+                return `${hours}h ${minutes}m`;
+            }
+            return `${minutes}m`;
+        }
+
+        function updateTodayProgress() {
+            const progress = JSON.parse(localStorage.getItem('studyBuddy_progress') || '{}');
+            const today = new Date().toDateString();
+            const todayTime = progress.dailyStudyTime[today] || 0;
+            
+            const hours = Math.floor(todayTime / 60);
+            const minutes = todayTime % 60;
+            document.getElementById('todayStudyTime').textContent = `${hours}h ${minutes}m`;
+            
+            // Update progress bar (assuming 8 hours daily target)
+            const dailyTarget = 8 * 60; // 8 hours in minutes
+            const percentage = Math.min((todayTime / dailyTarget) * 100, 100);
+            document.getElementById('todayProgressBar').style.width = `${percentage}%`;
+            
+            // Update missions
+            const missions = JSON.parse(localStorage.getItem('studyBuddy_missions') || '[]');
+            const todayMissions = missions.filter(mission => mission.date === today);
+            const completedMissions = todayMissions.filter(mission => mission.completed).length;
+            
+            document.getElementById('todayMissions').textContent = `${completedMissions}/${todayMissions.length}`;
+        }
+
+        function updateNextSession() {
+            const now = new Date();
+            const currentTime = now.toTimeString().slice(0, 5);
+            const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+            
+            const routine = JSON.parse(localStorage.getItem('studyBuddy_routine') || '{}');
+            const todaySchedule = routine[currentDay] || [];
+            
+            const nextSession = todaySchedule.find(session => session.startTime > currentTime);
+            const nextDiv = document.getElementById('nextSession');
+            
+            if (nextSession) {
+                nextDiv.innerHTML = `
+                    <div class="text-center">
+                        <div class="subject-${nextSession.subject} rounded-lg p-3 mb-2">
+                            <div class="text-white font-semibold">${nextSession.subject.charAt(0).toUpperCase() + nextSession.subject.slice(1)}</div>
+                        </div>
+                        <div class="text-white/80 text-sm">${nextSession.startTime} - ${nextSession.endTime}</div>
+                        <div class="text-blue-400 text-sm mt-1">
+                            <i class="fas fa-clock mr-1"></i>Coming Up
+                        </div>
+                    </div>
+                `;
+            } else {
+                nextDiv.innerHTML = `
+                    <div class="text-center py-4">
+                        <i class="fas fa-calendar-check text-4xl text-white/50 mb-2"></i>
+                        <p class="text-white/80">No upcoming sessions</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Modal Functions
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        // Form Handlers
+        document.getElementById('routineForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const day = document.getElementById('routineDay').value;
+            const startTime = document.getElementById('routineStartTime').value;
+            const endTime = document.getElementById('routineEndTime').value;
+            const subject = document.getElementById('routineSubject').value;
+            
+            if (startTime >= endTime) {
+                alert('End time must be after start time!');
+                return;
+            }
+            
+            if (addRoutineSession(day, startTime, endTime, subject)) {
+                closeModal('addRoutineModal');
+                this.reset();
+            }
+        });
+
+        document.getElementById('missionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('missionTitle').value;
+            const subject = document.getElementById('missionSubject').value;
+            const priority = document.getElementById('missionPriority').value;
+            
+            const missions = JSON.parse(localStorage.getItem('studyBuddy_missions') || '[]');
+            const today = new Date().toDateString();
+            const todayMissions = missions.filter(mission => mission.date === today);
+            
+            if (editingMissionIndex !== null) {
+                const missionId = todayMissions[editingMissionIndex].id;
+                const missionIndex = missions.findIndex(m => m.id === missionId);
+                missions[missionIndex].title = title;
+                missions[missionIndex].subject = subject;
+                missions[missionIndex].priority = priority;
+                localStorage.setItem('studyBuddy_missions', JSON.stringify(missions));
+                editingMissionIndex = null;
+            } else {
+                addMission(title, subject, priority);
+            }
+            closeModal('addMissionModal');
+            this.reset();
+            loadMissions();
+        });
+
+        document.getElementById('noteForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('noteTitle').value;
+            const subject = document.getElementById('noteSubject').value;
+            const content = document.getElementById('noteContent').value;
+            const tags = document.getElementById('noteTags').value;
+            const pinned = document.getElementById('notePinned').checked;
+            
+            const notes = JSON.parse(localStorage.getItem('studyBuddy_notes') || '[]');
+            
+            if (editingNoteIndex !== null) {
+                notes[editingNoteIndex].title = title;
+                notes[editingNoteIndex].subject = subject;
+                notes[editingNoteIndex].content = content;
+                notes[editingNoteIndex].tags = tags;
+                notes[editingNoteIndex].pinned = pinned;
+                localStorage.setItem('studyBuddy_notes', JSON.stringify(notes));
+                editingNoteIndex = null;
+            } else {
+                addNote(title, subject, content, tags, pinned);
+            }
+            closeModal('addNoteModal');
+            this.reset();
+            loadNotes();
+        });
+
+        document.getElementById('imageForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('imageTitle').value;
+            const subject = document.getElementById('imageSubject').value;
+            const description = document.getElementById('imageDescription').value;
+            const tags = document.getElementById('imageTags').value;
+            const pinned = document.getElementById('imagePinned').checked;
+            
+            const notes = JSON.parse(localStorage.getItem('studyBuddy_notes') || '[]');
+            
+            if (editingNoteIndex !== null) {
+                notes[editingNoteIndex].title = title;
+                notes[editingNoteIndex].subject = subject;
+                notes[editingNoteIndex].content = description;
+                notes[editingNoteIndex].tags = tags;
+                notes[editingNoteIndex].pinned = pinned;
+                if (currentImageData) notes[editingNoteIndex].imageData = currentImageData;
+                localStorage.setItem('studyBuddy_notes', JSON.stringify(notes));
+                editingNoteIndex = null;
+            } else {
+                addImage(title, subject, description, tags, pinned);
+            }
+            closeModal('addImageModal');
+            this.reset();
+            loadNotes();
+        });
+
+        // Search and Filter Functions
+        document.getElementById('noteSearch')?.addEventListener('input', filterNotes);
+        document.getElementById('subjectFilter')?.addEventListener('change', filterNotes);
+        document.getElementById('typeFilter')?.addEventListener('change', filterNotes);
+
+        function filterNotes() {
+            const searchTerm = document.getElementById('noteSearch')?.value.toLowerCase() || '';
+            const subjectFilter = document.getElementById('subjectFilter')?.value || '';
+            const typeFilter = document.getElementById('typeFilter')?.value || '';
+            
+            const notes = JSON.parse(localStorage.getItem('studyBuddy_notes') || '[]');
+            let filteredNotes = notes;
+            
+            if (searchTerm) {
+                filteredNotes = filteredNotes.filter(note => 
+                    note.title.toLowerCase().includes(searchTerm) ||
+                    note.content.toLowerCase().includes(searchTerm) ||
+                    (note.tags && note.tags.toLowerCase().includes(searchTerm))
+                );
+            }
+            
+            if (subjectFilter) {
+                filteredNotes = filteredNotes.filter(note => note.subject === subjectFilter);
+            }
+            
+            if (typeFilter) {
+                if (typeFilter === 'text') {
+                    filteredNotes = filteredNotes.filter(note => note.type !== 'image');
+                } else if (typeFilter === 'image') {
+                    filteredNotes = filteredNotes.filter(note => note.type === 'image');
+                }
+            }
+            
+            displayFilteredNotes(filteredNotes);
+        }
+
+        function displayFilteredNotes(notes) {
+            const notesList = document.getElementById('notesList');
+            notesList.innerHTML = '';
+            
+            if (notes.length === 0) {
+                notesList.innerHTML = `
+                    <div class="col-span-full glass rounded-2xl p-8 text-center">
+                        <i class="fas fa-search text-4xl text-white/50 mb-4"></i>
+                        <p class="text-white/80">No notes found matching your criteria.</p>
+                    </div>
+                `;
+            } else {
+                notes.forEach((note, index) => {
+                    const noteElement = createNoteElement(note, index);
+                    notesList.appendChild(noteElement);
+                });
+            }
+        }
+
+        // Data Management
+        function loadData() {
+            // Load dark mode preference
+            const darkMode = localStorage.getItem('studyBuddy_darkMode') === 'true';
+            if (darkMode) {
+                toggleDarkMode();
+            }
+        }
+
+        // Close modals when clicking outside
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('fixed') && e.target.classList.contains('inset-0')) {
+                e.target.classList.add('hidden');
+            }
+        });
+
+        // Motivational quotes
+        const quotes = [
+            "Success is the sum of small efforts repeated day in and day out.",
+            "The expert in anything was once a beginner.",
+            "Don't watch the clock; do what it does. Keep going.",
+            "Success is not final, failure is not fatal: it is the courage to continue that counts.",
+            "The future belongs to those who believe in the beauty of their dreams.",
+            "It always seems impossible until it's done.",
+            "The only way to do great work is to love what you do."
+        ];
+
+        function updateDailyQuote() {
+            const today = new Date().getDate();
+            const quote = quotes[today % quotes.length];
+            document.getElementById('dailyQuote').textContent = `"${quote}"`;
+        }
+
+        // Initialize daily quote
+        updateDailyQuote();
+
+        // Additional form handlers
+        document.getElementById('editSessionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!editingSession) return;
+            
+            const day = document.getElementById('editRoutineDay').value;
+            const startTime = document.getElementById('editRoutineStartTime').value;
+            const endTime = document.getElementById('editRoutineEndTime').value;
+            const subject = document.getElementById('editRoutineSubject').value;
+            
+            if (startTime >= endTime) {
+                alert('End time must be after start time!');
+                return;
+            }
+            
+            const routine = JSON.parse(localStorage.getItem('studyBuddy_routine') || '{}');
+            
+            // Remove old session
+            if (routine[editingSession.day]) {
+                routine[editingSession.day].splice(editingSession.index, 1);
+            }
+            
+            // Add updated session
+            if (!routine[day]) routine[day] = [];
+            
+            const newSession = { startTime, endTime, subject };
+            
+            // Check for conflicts (excluding the session being edited)
+            if (hasTimeConflict(routine[day], newSession)) {
+                alert('Time conflict detected! Please choose a different time slot.');
+                // Restore old session
+                if (!routine[editingSession.day]) routine[editingSession.day] = [];
+                routine[editingSession.day].push({ startTime: editingSession.oldStartTime, endTime: editingSession.oldEndTime, subject: editingSession.oldSubject });
+                routine[editingSession.day].sort((a, b) => a.startTime.localeCompare(b.startTime));
+                return;
+            }
+            
+            routine[day].push(newSession);
+            routine[day].sort((a, b) => a.startTime.localeCompare(b.startTime));
+            
+            localStorage.setItem('studyBuddy_routine', JSON.stringify(routine));
+            loadRoutine();
+            closeModal('editSessionModal');
+            editingSession = null;
+            this.reset();
+        });
+
+        // Enhanced timer with progress tracking
+        function updateStudyProgress(minutes) {
+            const progress = JSON.parse(localStorage.getItem('studyBuddy_progress') || '{}');
+            const today = new Date().toDateString();
+            const subject = document.getElementById('timerSubject').value || 'other';
+            
+            // Initialize if needed
+            if (!progress.totalStudyTime) progress.totalStudyTime = 0;
+            if (!progress.dailyStudyTime) progress.dailyStudyTime = {};
+            if (!progress.subjectTime) progress.subjectTime = {};
+            
+            // Update totals
+            progress.totalStudyTime += minutes;
+            progress.dailyStudyTime[today] = (progress.dailyStudyTime[today] || 0) + minutes;
+            progress.subjectTime[subject] = (progress.subjectTime[subject] || 0) + minutes;
+            
+            // Update streak
+            updateStreak(progress);
+            
+            localStorage.setItem('studyBuddy_progress', JSON.stringify(progress));
+            updateDashboard();
+            if (currentPage === 'progress') loadProgress();
+        }
+
+        function updateStreak(progress) {
+            const today = new Date().toDateString();
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayString = yesterday.toDateString();
+            
+            const todayStudied = (progress.dailyStudyTime[today] || 0) > 0;
+            const yesterdayStudied = (progress.dailyStudyTime[yesterdayString] || 0) > 0;
+            
+            if (todayStudied) {
+                if (yesterdayStudied || !progress.streak) {
+                    progress.streak = (progress.streak || 0) + 1;
+                } else {
+                    progress.streak = 1;
+                }
+                
+                // Update best streak
+                progress.bestStreak = Math.max(progress.bestStreak || 0, progress.streak);
+            }
+        }
     </script>
 </body>
 </html>
